@@ -11,7 +11,7 @@ from .renderers import UserJSONRenderer
 
 class RegistrationAPIView(APIView):
     permission_classes = (AllowAny,)
-    renderer_classes = (UserJSONRenderer,  )
+    renderer_classes = (UserJSONRenderer,)
     serializer_class = RegistrationSerializer
 
     def post(self, request):
@@ -33,6 +33,7 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)

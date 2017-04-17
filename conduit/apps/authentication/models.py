@@ -23,7 +23,6 @@ class UserManager(BaseUserManager):
 
         return user
 
-
     def create_superuser(self, username, email, password=None):
         if password is None:
             raise TypeError('Superusers must have a password.')
@@ -65,6 +64,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         dt = datetime.now() + timedelta(days=60)
         token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%s'))
+            'exp': int(dt.strftime('%S'))
         }, settings.SECRET_KEY, algorithm='HS256')
         return token.decode('utf-8')

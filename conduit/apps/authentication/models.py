@@ -64,9 +64,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         dt = datetime.now() + timedelta(days=60)
         token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%S'))
+            'exp': dt
         }, settings.SECRET_KEY, algorithm='HS256')
         token = token.decode('utf-8')
-        print("generated token:%s"%token)
+      #  print("generated token:%s"%token)
         return token
 

@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/conduit-django.iml" filepath="$PROJECT_DIR$/.idea/conduit-django.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/conduit-django.iml" filepath="$PROJECT_DIR$/.idea/conduit-django.iml" />
+      <module fileurl="file://E:\python\conduit-django\.idea\conduit-django.iml" filepath="E:\python\conduit-django\.idea\conduit-django.iml" />
     </modules>
   </component>
 </project>

@@ -7,7 +7,11 @@ from .renderers import ArticleJSONRenderer
 from .serializers import ArticleSerializer
 
 
-class ArticleViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+class ArticleViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     viewsets.GenericViewSet):
+    lookup_field = 'slug'
     queryset = Article.objects.select_related('author', 'author__user')
     permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_classes = (ArticleJSONRenderer,)

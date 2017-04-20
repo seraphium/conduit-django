@@ -14,6 +14,9 @@ class Profile(TimestampModel):
                                      related_name='followed_by',
                                      symmetrical=False)
 
+    favorites = models.ManyToManyField('articles.Article',
+                                       related_name='favorited_by')
+
     def follow(self, profile):
         self.follows.add(profile)
 
@@ -25,4 +28,13 @@ class Profile(TimestampModel):
 
     def is_followed_by(self, profile):
         return self.followed_by.filter(pk=profile.pk).exists()
+
+    def favorite(self, article):
+        self.favorites.add(article)
+
+    def unfavorite(self, article):
+        self.favorites.remove(article)
+
+    def has_favorited(self, article):
+        return self.favorites.filter(pk=article.pk).exists()
 

@@ -192,3 +192,5 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# django migrations
+migrations/

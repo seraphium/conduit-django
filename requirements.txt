@@ -3,6 +3,7 @@ dj-database-url==0.4.2
 Django==1.9.6
 django-extensions==1.6.7
 djangorestframework==3.3.3
+gunicorn==19.7.1
 packaging==16.8
 PyJWT==1.4.0
 pyparsing==2.2.0

@@ -4,7 +4,11 @@ Django==1.9.6
 django-extensions==1.6.7
 djangorestframework==3.3.3
 gunicorn==19.7.1
+heroku==0.1.4
 packaging==16.8
+psycopg2==2.7.1
 PyJWT==1.4.0
 pyparsing==2.2.0
+python-dateutil==1.5
+requests==2.14.2
 six==1.10.0

@@ -48,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
 
     parent = models.ForeignKey("self", null=True,  blank=True,related_name="children", on_delete=models.CASCADE)
     USERNAME_FIELD = 'name'
-    REQUIRED_FIELDS = ["phonenum"]
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 

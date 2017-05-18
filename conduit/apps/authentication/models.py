@@ -11,23 +11,23 @@ from django.contrib.auth.models import (
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, phonenum, password=None):
         if username is None:
             raise TypeError('User must have a username')
 
-        if email is None:
-            raise TypeError('User must have a password')
+        if phonenum is None:
+            raise TypeError('User must have a phone number')
 
-        user = self.model(username = username, email = self.normalize_email(email))
+        user = self.model(name=username, phonenum=phonenum, permission=0)
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_superuser(self, username, email, password=None):
+    def create_superuser(self, name, phonenum, password=None):
         if password is None:
             raise TypeError('Superusers must have a password.')
-        user = self.create_user(username, email, password)
+        user = self.create_user(name, phonenum, password)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -37,14 +37,18 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
 
-    username = models.CharField(db_index=True, max_length=255, unique=True)
-    email = models.EmailField(db_index=True, unique=True)
-
+    name = models.CharField(db_index=True, max_length=255, unique=True)
+    dept = models.CharField(db_index=True, max_length=255, blank=True)
+    line = models.CharField(db_index=True, max_length=255, blank=True)
+    phonenum = models.CharField(db_index=True, max_length=255, unique=True)
+    permission = models.SmallIntegerField()
+    remark = models.CharField(db_index=True, max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    parent = models.ForeignKey("self", null=True,  blank=True,related_name="children", on_delete=models.CASCADE)
+    USERNAME_FIELD = 'name'
+    REQUIRED_FIELDS = ["phonenum"]
 
     objects = UserManager()
 
@@ -56,10 +60,10 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
         return self._generate_jwt_token()
 
     def get_full_name(self):
-        return self.username
+        return self.name
 
     def get_short_name(self):
-        return self.username
+        return self.name
 
     def _generate_jwt_token(self):
         dt = datetime.now() + timedelta(days=60)

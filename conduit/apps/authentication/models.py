@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
     objects = UserManager()
 
     def __str__(self):
-        return self.email
+        return self.name
 
     @property
     def token(self):

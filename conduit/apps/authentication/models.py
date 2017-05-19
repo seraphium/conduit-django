@@ -11,14 +11,14 @@ from django.contrib.auth.models import (
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, username, phonenum, password=None):
-        if username is None:
+    def create_user(self, name, phonenum, password=None, dept=None, line=None):
+        if name is None:
             raise TypeError('User must have a username')
 
         if phonenum is None:
             raise TypeError('User must have a phone number')
 
-        user = self.model(name=username, phonenum=phonenum, permission=0)
+        user = self.model(name=name, phonenum=phonenum, permission=0, dept=dept, line=line)
         user.set_password(password)
         user.save()
 
@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
     objects = UserManager()
 
     def __str__(self):
-        return self.email
+        return self.name
 
     @property
     def token(self):

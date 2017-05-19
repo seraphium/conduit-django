@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'conduit.apps.core',
     'conduit.apps.profiles',
     'conduit.apps.units',
-    'conduit.apps.reports'
+    'conduit.apps.reports',
+    'conduit.apps.sms'
 ]
 
 MIDDLEWARE_CLASSES = [

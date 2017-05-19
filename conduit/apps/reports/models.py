@@ -28,3 +28,28 @@ class Report(TimestampModel):
     def __str__(self):
         return self.time.strftime('%b %d %Y %H:%M:%S') + ":" + self.unit.name + ":" + self.message
 
+
+class DeviceReport(TimestampModel):
+    unit = models.ForeignKey('units.Unit', null=False, related_name='devicereports', on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    temperature = models.IntegerField(blank=True, null=True)
+    csq = models.IntegerField()
+    mode = models.IntegerField()
+    resetcount = models.IntegerField()
+    networkstatus = models.IntegerField()
+    protocolversion = models.IntegerField()
+    hardwareversion = models.IntegerField()
+    softwareversion = models.IntegerField()
+
+    picresolution = models.CharField(max_length=32)
+    picenable = models.BooleanField()
+    piclightenhance = models.BooleanField()
+    highsensitivity = models.BooleanField()
+    beep = models.BooleanField()
+    status = models.SmallIntegerField(blank=True, null=True)
+    powerstatus = models.SmallIntegerField(blank=True, null=True)
+    gprsstatus = models.SmallIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.time.strftime('%b %d %Y %H:%M:%S') + ":" + self.unit.name
+

@@ -39,7 +39,7 @@ class Unit(TimestampModel):
 
 
 class UnitAlertSettings(TimestampModel):
-    unit = models.OneToOneField("units.Unit", on_delete=models.CASCADE)
+    unit = models.OneToOneField("units.Unit", related_name="alertsettings", on_delete=models.CASCADE)
     alertdistance1 = models.IntegerField()
     alertdistance2 = models.IntegerField()
     alertdistance3 = models.IntegerField()
@@ -64,16 +64,16 @@ class UnitAlertSettings(TimestampModel):
     camera3mediainterval = models.SmallIntegerField()
 
 class UnitNetworkSettings(TimestampModel):
-    unit = models.OneToOneField("units.Unit", on_delete=models.CASCADE)
+    unit = models.OneToOneField("units.Unit",related_name="networksettings", on_delete=models.CASCADE)
     serverip = models.CharField(max_length=32, default="121.41.25.64")
-    serverport = models.IntegerField()
-    transfertype = models.SmallIntegerField()
-    networktype = models.SmallIntegerField()
+    serverport = models.IntegerField(default='8682')
+    transfertype = models.SmallIntegerField(blank=True, null=True)
+    networktype = models.SmallIntegerField(blank=True, null=True)
     apn = models.CharField(max_length=32, blank=True)
     apnusername = models.CharField(max_length=32, blank=True)
     apnpassword = models.CharField(max_length=32, blank=True)
-    timeout = models.IntegerField()
-    retrycount = models.IntegerField()
-    resetcount = models.IntegerField()
-    csq = models.IntegerField()
-    networkstatus = models.IntegerField()
+    timeout = models.IntegerField(blank=True, null=True)
+    retrycount = models.IntegerField(blank=True, null=True)
+    resetcount = models.IntegerField(blank=True, null=True)
+    csq = models.IntegerField(blank=True, null=True)
+    networkstatus = models.IntegerField(blank=True, null=True)

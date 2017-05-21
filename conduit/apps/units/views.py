@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Unit
-from .serializers import UnitSerializer, UnitAlertSettingsSerializer
+from .serializers import UnitSerializer
 from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer
 
 class UnitsViewSet(mixins.CreateModelMixin,
@@ -17,12 +17,15 @@ class UnitsViewSet(mixins.CreateModelMixin,
 
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = UnitSerializer
+
     renderer_classes = (UnitJSONRenderer, UnitAlertSettingsJSONRenderer)
 
     def create(self, request):
+
+        data = request.data.get('unit', {})
+
         serializer_context = {
-            'alertsettings': request.unit.alertsettings,
-            'networksettings': request.unit.networksettings,
+            'owner': request.user,
             'request': request
         }
         serializer_data = request.data.get('unit', {})
@@ -58,6 +61,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
     def update(self, request, id):
 
         serializer_context = {'request': request}
+
 
         try:
             serializer_instance = self.queryset.get(id=id)

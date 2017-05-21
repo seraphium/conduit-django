@@ -34,9 +34,11 @@ class UnitAlertSettingsSerializer(serializers.ModelSerializer):
             'camera1videoduration',
             'camera1videoframerate',
             'camera1mediainterval',
+            'camera2mode',
             'camera2videoduration',
             'camera2videoframerate',
             'camera2mediainterval',
+            'camera3mode',
             'camera3videoduration',
             'camera3videoframerate',
             'camera3mediainterval',
@@ -117,6 +119,21 @@ class UnitSerializer(serializers.ModelSerializer):
         # We use OrderedDict like in original method
         ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
         return ret
+
+
+
+    def create(self, validated_data):
+        alertsettings = validated_data.pop('alertsettings', {})
+        networksettings = validated_data.pop('networksettings', {})
+        owner = self.context['owner']
+        unit = Unit.objects.create(owner=owner, **validated_data)
+
+
+        alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
+        network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
+        unit.alertsettings = alert
+        unit.networksettings = network
+        return unit
 
     class Meta:
         model = Unit

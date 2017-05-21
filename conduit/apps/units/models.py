@@ -25,7 +25,7 @@ class Unit(TimestampModel):
     lng = models.FloatField(blank=True, null=True)
     unsync = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
-    operators = models.ManyToManyField('authentication.User', related_name='units',symmetrical=False, blank=True)
+    operators = models.ManyToManyField('authentication.User', related_name='units', symmetrical=False, blank=True)
     status = models.SmallIntegerField(blank=True, null=True)
     powerstatus = models.SmallIntegerField(blank=True, null=True)
     gprsstatus = models.SmallIntegerField(blank=True, null=True)

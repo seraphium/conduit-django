@@ -47,8 +47,8 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         user_data = request.data.get('user', {})
         serializer_data = {
-            'name':  user_data.get('name', request.user.username),
-            'phonenum': user_data.get('phonenum', request.user.email),
+            'name':  user_data.get('name', request.user.name),
+            'phonenum': user_data.get('phonenum', request.user.phonenum),
 
         }
 

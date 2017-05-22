@@ -188,7 +188,7 @@ class UnitSerializer(serializers.ModelSerializer):
         return instance.owner.id
 
     def get_operators_id(self, instance):
-        return ','.join(instance.operators) if instance.operators.count() > 0 else None
+        return list(instance.operators.all().values_list("id", flat=True))
 
     def get_created_at(self, instance):
         return instance.created_at.isoformat()

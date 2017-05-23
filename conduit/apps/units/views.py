@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from .models import Unit
 from .serializers import UnitSerializer
-from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer
+from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer
 
 class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -18,7 +18,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = UnitSerializer
 
-    renderer_classes = (UnitJSONRenderer, UnitAlertSettingsJSONRenderer)
+    renderer_classes = (UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer)
 
     def create(self, request):
 
@@ -75,6 +75,7 @@ class UnitModifyAPIView(generics.DestroyAPIView, generics.UpdateAPIView):
     lookup_url_kwarg = 'unit_id'
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Unit.objects.all()
+    serializer_class = UnitSerializer
 
     def destroy(self, request, unit_id=None):
         try:
@@ -88,13 +89,14 @@ class UnitModifyAPIView(generics.DestroyAPIView, generics.UpdateAPIView):
 
     def update(self, request, unit_id=None):
 
-        serializer_context = {'request': request}
+        serializer_data = request.data.get('unit', {})
+
+        serializer_context = {'request': request, 'operators': serializer_data['operators']}
 
         try:
             serializer_instance = self.queryset.get(id=unit_id)
         except Unit.DoesNotExist:
             raise NotFound("unit with id not found")
-        serializer_data = request.data.get('unit', {})
 
         serializer = self.serializer_class(serializer_instance,
                                             context=serializer_context,

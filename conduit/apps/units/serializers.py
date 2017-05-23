@@ -2,6 +2,7 @@ from rest_framework import serializers
 from collections import OrderedDict
 from .models import Unit, UnitAlertSettings, UnitNetworkSettings
 from conduit.apps.authentication.models import User
+from rest_framework.exceptions import NotFound
 
 class UnitAlertSettingsSerializer(serializers.ModelSerializer):
     #unit = serializers.SerializerMethodField(method_name='get_unit_id')
@@ -138,6 +139,30 @@ class UnitSerializer(serializers.ModelSerializer):
         unit.operators = [User.objects.get(id = id) for id in operators_id]
 
         return unit
+
+    def update(self, instance, validated_data):
+        alertsettings = validated_data.pop('alertsettings', {})
+        networksettings = validated_data.pop('networksettings', {})
+        operators_id = self.context['operators']
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        for (key, value) in alertsettings.items():
+            setattr(instance.alertsettings, key, value)
+        for (key, value) in networksettings.items():
+            setattr(instance.networksettings, key, value)
+        try:
+            operators = [User.objects.get(id=id) for id in operators_id]
+        except User.DoesNotExist:
+            raise NotFound('operator with id does not exists.')
+
+        instance.operators = operators
+        instance.alertsettings.save()
+        instance.networksettings.save()
+        instance.save()
+
+        return instance
+
 
     class Meta:
         model = Unit

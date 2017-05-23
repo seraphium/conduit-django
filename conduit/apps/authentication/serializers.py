@@ -54,8 +54,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('name', 'password', 'token', 'phonenum', 'dept', 'line')
-        read_only_fields = ('token',)
+        fields = ('id', 'name', 'password', 'token', 'phonenum', 'dept', 'line')
+        read_only_fields = ('id', 'token',)
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)

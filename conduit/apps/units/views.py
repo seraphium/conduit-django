@@ -2,7 +2,6 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Unit
 from .serializers import UnitSerializer
@@ -71,23 +70,13 @@ class UnitsViewSet(mixins.CreateModelMixin,
         return Response(serializer.data, status = status.HTTP_200_OK)
 
 
-class UnitModifyAPIView(generics.DestroyAPIView, generics.UpdateAPIView):
+class UnitUpdateAPIView(generics.UpdateAPIView):
     lookup_url_kwarg = 'unit_id'
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     queryset = Unit.objects.all()
     serializer_class = UnitSerializer
 
-    def destroy(self, request, unit_id=None):
-        try:
-            unit = Unit.objects.get(id=unit_id)
-        except Unit.DoesNotExist:
-            raise NotFound('A Unit with this ID does not exists.')
-
-        unit.delete()
-
-        return Response(None,  status=status.HTTP_204_NO_CONTENT)
-
-    def update(self, request, unit_id=None):
+    def post(self, request, unit_id=None):
 
         serializer_data = request.data.get('unit', {})
 
@@ -106,3 +95,20 @@ class UnitModifyAPIView(generics.DestroyAPIView, generics.UpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UnitDeleteAPIView(generics.DestroyAPIView):
+    lookup_url_kwarg = 'unit_id'
+    permission_classes = (IsAuthenticated,)
+    queryset = Unit.objects.all()
+    serializer_class = UnitSerializer
+
+    def post(self, request, unit_id=None):
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('Unit with this ID does not exists.')
+
+        unit.delete()
+
+        return Response(None,  status=status.HTTP_204_NO_CONTENT)

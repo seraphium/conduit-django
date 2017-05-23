@@ -56,27 +56,6 @@ class UnitsViewSet(mixins.CreateModelMixin,
         return self.get_paginated_response(serializer.data)
 
 
-
-    def update(self, request, id):
-
-        serializer_context = {'request': request}
-
-
-        try:
-            serializer_instance = self.queryset.get(id=id)
-        except Unit.DoesNotExist:
-            raise NotFound("unit with id not found")
-        serializer_data = request.data.get('unit', {})
-
-        serializer = self.serializer_class(serializer_instance,
-                                            context=serializer_context,
-                                            data=serializer_data,
-                                            partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     def retrieve(self, request, id):
 
         serializer_context = {'request': request}
@@ -92,7 +71,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
         return Response(serializer.data, status = status.HTTP_200_OK)
 
 
-class UnitDestroyAPIView(generics.DestroyAPIView):
+class UnitModifyAPIView(generics.DestroyAPIView, generics.UpdateAPIView):
     lookup_url_kwarg = 'unit_id'
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Unit.objects.all()
@@ -106,3 +85,22 @@ class UnitDestroyAPIView(generics.DestroyAPIView):
         unit.delete()
 
         return Response(None,  status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, unit_id=None):
+
+        serializer_context = {'request': request}
+
+        try:
+            serializer_instance = self.queryset.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
+        serializer_data = request.data.get('unit', {})
+
+        serializer = self.serializer_class(serializer_instance,
+                                            context=serializer_context,
+                                            data=serializer_data,
+                                            partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

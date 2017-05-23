@@ -92,4 +92,17 @@ class UnitsViewSet(mixins.CreateModelMixin,
         return Response(serializer.data, status = status.HTTP_200_OK)
 
 
+class UnitDestroyAPIView(generics.DestroyAPIView):
+    lookup_url_kwarg = 'unit_id'
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    queryset = Unit.objects.all()
 
+    def destroy(self, request, unit_id=None):
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('A Unit with this ID does not exists.')
+
+        unit.delete()
+
+        return Response(None,  status=status.HTTP_204_NO_CONTENT)

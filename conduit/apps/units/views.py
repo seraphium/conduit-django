@@ -22,14 +22,13 @@ class UnitsViewSet(mixins.CreateModelMixin,
 
     def create(self, request):
 
-        data = request.data.get('unit', {})
+        serializer_data = request.data.get('unit', {})
 
         serializer_context = {
             'owner': request.user,
-            'request': request
+            'request': request,
+            'operators': serializer_data['operators']
         }
-        serializer_data = request.data.get('unit', {})
-
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()

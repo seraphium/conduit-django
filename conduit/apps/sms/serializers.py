@@ -48,7 +48,7 @@ class SmsSerializer(serializers.ModelSerializer):
             'checksumcorrect',
             'iotid',
         )
-        read_only_fields = ('direction', 'sender', 'receiver', 'content')
+       # read_only_fields = ('direction', 'sender', 'receiver', 'content')
 
     def get_device(self, instance):
         return instance.device.id if instance.device else None

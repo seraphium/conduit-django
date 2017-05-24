@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^api/', include('conduit.apps.authentication.urls', namespace='authentication')),
     url(r'^api/', include('conduit.apps.profiles.urls', namespace='profiles')),
     url(r'^api/', include('conduit.apps.units.urls', namespace='units')),
+    url(r'^api/', include('conduit.apps.sms.urls', namespace='sms')),
 
 ]

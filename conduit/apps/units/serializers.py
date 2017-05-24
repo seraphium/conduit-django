@@ -14,7 +14,7 @@ class UnitAlertSettingsSerializer(serializers.ModelSerializer):
         ret = super(UnitAlertSettingsSerializer, self).to_representation(instance)
         # Here we filter the null values and creates a new dictionary
         # We use OrderedDict like in original method
-        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
+        ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
         return ret
 
     class Meta:
@@ -69,7 +69,7 @@ class UnitNetworkSettingsSerializer(serializers.ModelSerializer):
         ret = super(UnitNetworkSettingsSerializer, self).to_representation(instance)
         # Here we filter the null values and creates a new dictionary
         # We use OrderedDict like in original method
-        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
+        ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
         return ret
 
     class Meta:
@@ -119,7 +119,7 @@ class UnitSerializer(serializers.ModelSerializer):
         ret = super(UnitSerializer, self).to_representation(instance)
         # Here we filter the null values and creates a new dictionary
         # We use OrderedDict like in original method
-        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
+        ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
         return ret
 
 

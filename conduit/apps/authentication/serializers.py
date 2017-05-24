@@ -23,6 +23,7 @@ class LoginSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, write_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
+    owned_units = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         name = data.get('name', None)
@@ -38,10 +39,12 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'This user has been deactivated.'
             )
+
         return {
             'name': user.name,
             'phonenum': user.phonenum,
-            'token': user.token
+            'token': user.token,
+            'owned_units': [unit.id for unit in user.ownedunits.all()]
         }
 
 

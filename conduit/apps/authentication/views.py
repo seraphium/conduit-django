@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import RegistrationSerializer, LoginSerializer, UserSerializer
+from .serializers import RegistrationSerializer, LoginSerializer, UserSerializer, UserUpdateSerializer
 
 from .renderers import UserJSONRenderer
 
@@ -39,20 +39,21 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UserSerializer
+    update_serializer_class = UserUpdateSerializer
 
     def retrieve(self, request, *args, **kwargs):
         serializer = self.serializer_class(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        user_data = request.data.get('user', {})
-        serializer_data = {
-            'name':  user_data.get('name', request.user.name),
-            'phonenum': user_data.get('phonenum', request.user.phonenum),
 
-        }
+        serializer_data = request.data.get('user', {})
+        updating_user_name = serializer_data.get('name', None)
 
-        serializer = self.serializer_class(
+        if updating_user_name != request.user.name :
+            return Response({'error': 'cannot update other user'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.update_serializer_class(
             request.user, data=serializer_data, partial=True
         )
         serializer.is_valid(raise_exception=True)

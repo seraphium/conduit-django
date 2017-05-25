@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
-from conduit.apps.profiles.serializers import ProfileSerializer
+from conduit.apps.units.serializers import UnitSerializer
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -23,7 +23,6 @@ class LoginSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, write_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
-    owned_units = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         name = data.get('name', None)
@@ -42,25 +41,31 @@ class LoginSerializer(serializers.Serializer):
 
         return {
             'name': user.name,
-            'phonenum': user.phonenum,
             'token': user.token,
-            'owned_units': [unit.id for unit in user.ownedunits.all()]
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        max_length=128,
-        min_length=8,
-        write_only=True
-    )
-
+class ChildrenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'password', 'token', 'phonenum', 'dept', 'line')
         read_only_fields = ('id', 'token',)
 
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        max_length=128,
+        min_length=8,
+        write_only=True
+    )
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'password', 'phonenum', 'dept', 'line', 'children')
+        read_only_fields = ('id',)
+
     def update(self, instance, validated_data):
+        children = validated_data.get('children', None)
+
         password = validated_data.pop('password', None)
 
         for (key, value) in validated_data.items():
@@ -69,7 +74,23 @@ class UserSerializer(serializers.ModelSerializer):
         if password is not None:
             instance.set_password(password)
 
+        instance.children.set(children)
         instance.save()
 
         return instance
 
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        max_length=128,
+        min_length=8,
+        write_only=True
+    )
+    ownedunits = UnitSerializer(many=True)
+    children = ChildrenSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'password', 'token', 'phonenum', 'dept', 'line',
+                  'ownedunits', 'children')
+        read_only_fields = ('id', 'token',)

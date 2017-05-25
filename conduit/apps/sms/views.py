@@ -25,7 +25,7 @@ class SmsViewSet(mixins.CreateModelMixin,
 
         serializer_context = {
             'request': request,
-            'device_id': serializer_data['device_id']
+            'device_id': serializer_data.get('device_id', None)
         }
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

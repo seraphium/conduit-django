@@ -38,10 +38,12 @@ class UnitsViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         id = self.request.query_params.get('id', None)
+   #     lasttime = self.request.query_params.get('lasttime', None)
+
         if id is not None:
             queryset = queryset.filter(id=id)
-
-
+    #    elif lasttime is not None:
+    #        queryset = queryset.filter(updated_at = lasttime)
         return queryset
 
     def list(self, request):

@@ -16,8 +16,8 @@ class SmsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        device_id = self.context['device_id']
-        device = Unit.objects.get(id=device_id) or None
+        device_id = self.context.get('device_id', None)
+        device = Unit.objects.get(id=device_id) if device_id is not None else None
         sms = Sms.objects.create(device=device, **validated_data)
         return sms
 

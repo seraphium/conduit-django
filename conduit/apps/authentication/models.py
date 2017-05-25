@@ -43,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
     phonenum = models.CharField(db_index=True, max_length=32, unique=True)
     permissions = ((0, 'admin'), (1, 'operator'))
     permission = models.SmallIntegerField(choices=permissions)
-    remark = models.CharField(db_index=True, max_length=255)
+    remark = models.CharField(db_index=True, max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 

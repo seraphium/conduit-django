@@ -193,7 +193,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"user\":{\"email\":\"john@jacob.com\"}}"
+							"raw": "{\n  \"user\": {\n    \"name\": \"admin\",\n    \"password\": \"bk5000bk6000\",\n    \"phonenum\": \"13800000006\",\n    \"dept\": \"admin1dept\",\n    \"line\": \"admin1line\",\n    \"children\": [3,4]\n  }\n}"
 						},
 						"description": ""
 					},

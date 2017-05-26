@@ -15,7 +15,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
     lookup_field = 'id'
     queryset = Unit.objects.select_related('alertsettings', 'networksettings')
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = UnitSerializer
 
     renderer_classes = (UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer)
@@ -38,6 +38,9 @@ class UnitsViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         queryset = self.queryset
 
+        if self.request.user.is_superuser is not True:
+            queryset = queryset.filter(owner=self.request.user)
+
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)
 
@@ -46,6 +49,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
+
         return queryset
 
     def list(self, request):

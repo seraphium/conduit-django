@@ -37,6 +37,10 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+
+        if self.request.user.is_superuser is not True:
+            queryset = queryset.filter(unit__owner=self.request.user)
+
         lasttime_string = self.request.query_params.get('lasttime', None)
 
         id = self.request.query_params.get('id', None)
@@ -148,6 +152,9 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+
+        if self.request.user.is_superuser is not True:
+            queryset = queryset.filter(unit__owner=self.request.user)
 
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)

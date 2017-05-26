@@ -6,7 +6,7 @@ from conduit.apps.units.models import UnitAlertSettings
 
 class UnitAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'phonenum','identity','towerfrom', 'towerto', 'idintower',
-                    'parent', 'get_alertsettings_distance1', 'get_alertsettings_distance2',
+                    'parent', 'owner', 'get_alertsettings_distance1', 'get_alertsettings_distance2',
                     'get_alertsettings_distance3', 'status', 'updated_at')
 
     def get_alertsettings_distance1(self, obj):

@@ -8,6 +8,7 @@ from .serializers import (ReportSerializer,DeviceReportSerializer)
 from .renderers import (ReportJSONRenderer,DeviceReportJSONRenderer)
 
 from datetime import datetime
+from django.db.models import Q
 
 class ReportViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -39,7 +40,9 @@ class ReportViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         if self.request.user.is_superuser is not True:
-            queryset = queryset.filter(unit__owner=self.request.user)
+            ownerQ = Q(unit__owner=self.request.user)
+            operatorQ = Q(unit__operators__id__contains=self.request.user.id)
+            queryset = queryset.filter(ownerQ | operatorQ)
 
         lasttime_string = self.request.query_params.get('lasttime', None)
 
@@ -154,7 +157,9 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         if self.request.user.is_superuser is not True:
-            queryset = queryset.filter(unit__owner=self.request.user)
+            ownerQ = Q(unit__owner=self.request.user)
+            operatorQ = Q(unit__operators__id__contains=self.request.user.id)
+            queryset = queryset.filter(ownerQ | operatorQ)
 
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)

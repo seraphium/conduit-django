@@ -7,6 +7,7 @@ from .models import Unit
 from .serializers import UnitSerializer
 from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer
 from datetime import datetime
+from django.db.models import Q
 
 class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -39,7 +40,9 @@ class UnitsViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         if self.request.user.is_superuser is not True:
-            queryset = queryset.filter(owner=self.request.user)
+            ownerQ = Q(owner=self.request.user)
+            operatorQ = Q(operators__id__contains=self.request.user.id)
+            queryset = queryset.filter(ownerQ | operatorQ)
 
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)

@@ -38,18 +38,18 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
 
     name = models.CharField(db_index=True, max_length=255, unique=True)
-    dept = models.CharField(db_index=True, max_length=255, blank=True)
-    line = models.CharField(db_index=True, max_length=255, blank=True)
+    dept = models.CharField(db_index=True, max_length=255, blank=True, null=True)
+    line = models.CharField(db_index=True, max_length=255, blank=True, null=True)
     phonenum = models.CharField(db_index=True, max_length=32, unique=True)
     permissions = ((0, 'admin'), (1, 'operator'))
     permission = models.SmallIntegerField(choices=permissions)
-    remark = models.CharField(db_index=True, max_length=255, blank=True)
+    remark = models.CharField(db_index=True, max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     parent = models.ForeignKey("self", null=True, blank=True, related_name="children", on_delete=models.CASCADE)
     USERNAME_FIELD = 'name'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['phonenum']
 
     objects = UserManager()
 

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .models import Unit
 from .serializers import UnitSerializer
 from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer
+from datetime import datetime
 
 class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -38,12 +39,13 @@ class UnitsViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         id = self.request.query_params.get('id', None)
-   #     lasttime = self.request.query_params.get('lasttime', None)
+        lasttime_string = self.request.query_params.get('lasttime', None)
 
         if id is not None:
             queryset = queryset.filter(id=id)
-    #    elif lasttime is not None:
-    #        queryset = queryset.filter(updated_at = lasttime)
+        elif lasttime_string is not None:
+            lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
+            queryset = queryset.filter(updated_at__gt=lasttime)
         return queryset
 
     def list(self, request):

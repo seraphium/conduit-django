@@ -7,6 +7,8 @@ from .models import (Report, DeviceReport)
 from .serializers import (ReportSerializer,DeviceReportSerializer)
 from .renderers import (ReportJSONRenderer,DeviceReportJSONRenderer)
 
+from datetime import datetime
+
 class ReportViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
@@ -35,11 +37,14 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+        lasttime_string = self.request.query_params.get('lasttime', None)
 
         id = self.request.query_params.get('id', None)
         if id is not None:
             queryset = queryset.filter(id=id)
-
+        elif lasttime_string is not None:
+            lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
+            queryset = queryset.filter(updated_at__gt=lasttime)
 
         return queryset
 
@@ -145,8 +150,13 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         id = self.request.query_params.get('id', None)
+        lasttime_string = self.request.query_params.get('lasttime', None)
+
         if id is not None:
             queryset = queryset.filter(id=id)
+        elif lasttime_string is not None:
+            lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
+            queryset = queryset.filter(updated_at__gt=lasttime)
         return queryset
 
     def list(self, request):

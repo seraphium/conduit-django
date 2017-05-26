@@ -4,10 +4,12 @@ from conduit.apps.reports.models import DeviceReport
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('id', 'time','unit','distance1current','distance2current','distance3current', 'message', 'isalert')
+    list_display = ('id', 'time','unit','distance1current','distance2current','distance3current', 'message', 'isalert',
+                    'updated_at')
 
 class DeviceReportAdmin(admin.ModelAdmin):
-    list_display = ('id', 'time','unit','csq','mode','protocolversion', 'hardwareversion', 'softwareversion')
+    list_display = ('id', 'time','unit','csq','mode','protocolversion', 'hardwareversion', 'softwareversion',
+                    'updated_at')
 
 
 admin.site.register(Report, ReportAdmin)

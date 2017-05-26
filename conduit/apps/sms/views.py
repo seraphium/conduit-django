@@ -7,6 +7,9 @@ from .models import Sms
 from .serializers import SmsSerializer
 from .renderers import SmsJSONRenderer
 
+from datetime import datetime
+
+
 class SmsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
@@ -37,9 +40,13 @@ class SmsViewSet(mixins.CreateModelMixin,
         queryset = self.queryset
 
         id = self.request.query_params.get('id', None)
+        lasttime_string = self.request.query_params.get('lasttime', None)
+
         if id is not None:
             queryset = queryset.filter(id=id)
-
+        elif lasttime_string is not None:
+            lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
+            queryset = queryset.filter(updated_at__gt=lasttime)
 
         return queryset
 

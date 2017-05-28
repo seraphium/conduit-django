@@ -2,6 +2,8 @@ from rest_framework import serializers
 from collections import OrderedDict
 from .models import Sms
 from conduit.apps.units.models import Unit
+from rest_framework.exceptions import NotFound
+from django.db.models import Q
 
 
 class SmsSerializer(serializers.ModelSerializer):
@@ -15,9 +17,20 @@ class SmsSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-
+        request = self.context.get('request', None)
         device_id = self.context.get('device_id', None)
-        device = Unit.objects.get(id=device_id) if device_id is not None else None
+        queryset = Unit.objects.all()
+        # device_id must in owner/opeator's unit list
+        if request.user.is_superuser is not True:
+            ownerQ = Q(owner=request.user)
+            operatorQ = Q(operators__id__contains=request.user.id)
+            queryset = queryset.filter(ownerQ | operatorQ)
+
+        try:
+            device = queryset.get(id=device_id) if device_id is not None else None
+        except Unit.DoesNotExist:
+            raise NotFound('Unit with device id not found or not owner/operator')
+
         sms = Sms.objects.create(device=device, **validated_data)
         return sms
 
@@ -27,8 +40,11 @@ class SmsSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+        try:
+            device = Unit.objects.get(id=device_id) or None
+        except Unit.DoesNotExist:
+            raise NotFound('Unit with device id not found')
 
-        device = Unit.objects.get(id=device_id) or None
         instance.device = device
         instance.save()
 

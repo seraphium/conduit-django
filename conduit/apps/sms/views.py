@@ -8,6 +8,7 @@ from .serializers import SmsSerializer
 from .renderers import SmsJSONRenderer
 
 from datetime import datetime
+from django.db.models import Q
 
 
 class SmsViewSet(mixins.CreateModelMixin,
@@ -17,7 +18,7 @@ class SmsViewSet(mixins.CreateModelMixin,
     lookup_field = 'id'
     queryset = Sms.objects.all()
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = SmsSerializer
 
     renderer_classes = (SmsJSONRenderer, )
@@ -30,6 +31,7 @@ class SmsViewSet(mixins.CreateModelMixin,
             'request': request,
             'device_id': serializer_data.get('device_id', None)
         }
+
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -38,6 +40,10 @@ class SmsViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+
+        if self.request.user.is_superuser is not True:
+            deviceQ = Q(device__in=self.request.user.ownedunits.all())
+            queryset = queryset.filter(deviceQ)
 
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)
@@ -88,10 +94,16 @@ class SmsUpdateAPIView(generics.UpdateAPIView):
 
         serializer_context = {'request': request, 'device_id': serializer_data['device_id']}
 
+        queryset = self.queryset
+
+        if self.request.user.is_superuser is not True:
+            deviceQ = Q(device__in=self.request.user.ownedunits.all())
+            queryset = queryset.filter(deviceQ)
+
         try:
-            serializer_instance = self.queryset.get(id=sms_id)
+            serializer_instance = queryset.get(id=sms_id)
         except Sms.DoesNotExist:
-            raise NotFound("sms with id not found")
+            raise NotFound("sms with id not found or device_id not in owner/operator")
 
         serializer = self.serializer_class(serializer_instance,
                                             context=serializer_context,

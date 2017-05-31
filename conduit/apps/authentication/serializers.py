@@ -73,8 +73,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
         if password is not None:
             instance.set_password(password)
+        if children is not None:
+            instance.children.set(children)
 
-        instance.children.set(children)
         instance.save()
 
         return instance

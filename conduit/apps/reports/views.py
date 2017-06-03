@@ -17,7 +17,7 @@ class ReportViewSet(mixins.CreateModelMixin,
     lookup_field = 'id'
     queryset = Report.objects.all()
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ReportSerializer
 
     renderer_classes = (ReportJSONRenderer, )
@@ -47,12 +47,15 @@ class ReportViewSet(mixins.CreateModelMixin,
         lasttime_string = self.request.query_params.get('lasttime', None)
 
         id = self.request.query_params.get('id', None)
+        unit_id = self.request.query_params.get('unit_id', None)
+
         if id is not None:
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
-
+        elif unit_id is not None:
+            queryset = queryset.filter(unit__id=unit_id)
         return queryset
 
     def list(self, request):
@@ -163,12 +166,15 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
 
         id = self.request.query_params.get('id', None)
         lasttime_string = self.request.query_params.get('lasttime', None)
+        unit_id = self.request.query_params.get('unit_id', None)
 
         if id is not None:
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
+        elif unit_id is not None:
+            queryset = queryset.filter(unit__id=unit_id)
         return queryset
 
     def list(self, request):

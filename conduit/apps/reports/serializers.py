@@ -5,7 +5,9 @@ from conduit.apps.units.models import Unit
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    unit_id = serializers.SerializerMethodField(method_name='get_unit')
+    unit_id = serializers.SerializerMethodField(method_name='get_unitId')
+    unit_name = serializers.SerializerMethodField(method_name='get_unitName')
+
     ackoperator_id = serializers.SerializerMethodField(method_name='get_ackoperator')
 
     def to_representation(self, instance):
@@ -38,6 +40,7 @@ class ReportSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'unit_id',
+            'unit_name',
             'time',
             'distance1current',
             'distance1quota',
@@ -60,15 +63,20 @@ class ReportSerializer(serializers.ModelSerializer):
             'mediatypecamera3',
         )
 
-    def get_unit(self, instance):
+    def get_unitId(self, instance):
         return instance.unit.id if instance.unit else None
+
+    def get_unitName(self, instance):
+        return instance.unit.name if instance.unit else None
+
 
     def get_ackoperator(self, instance):
         return instance.ackoperator.id if instance.ackoperator else None
 
 
 class DeviceReportSerializer(serializers.ModelSerializer):
-    unit_id = serializers.SerializerMethodField(method_name='get_unit')
+    unit_id = serializers.SerializerMethodField(method_name='get_unitId')
+    unit_name = serializers.SerializerMethodField(method_name='get_unitName')
 
     def to_representation(self, instance):
         ret = super(DeviceReportSerializer, self).to_representation(instance)
@@ -100,6 +108,7 @@ class DeviceReportSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'unit_id',
+            'unit_name',
             'time',
             'temperature',
             'csq',
@@ -119,5 +128,8 @@ class DeviceReportSerializer(serializers.ModelSerializer):
             'gprsstatus',
         )
 
-    def get_unit(self, instance):
+    def get_unitId(self, instance):
         return instance.unit.id if instance.unit else None
+
+    def get_unitName(self, instance):
+        return instance.unit.name if instance.unit else None

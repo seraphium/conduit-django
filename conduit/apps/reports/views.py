@@ -56,8 +56,11 @@ class ReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
         elif unit_id is not None:
-            unit = unit_queryset.get(id=unit_id)
-            unit_selected = unit
+            try:
+                unit = unit_queryset.get(id=unit_id)
+            except Unit.DoesNotExist:
+                raise NotFound('unit with id not found')
+            unit_selected = unit_queryset.filter(id=unit_id)
             if unit.type == 1:      #line
                 unit_selected = unit_queryset.filter(parent=unit)
             elif unit.type == 0:    #city
@@ -182,8 +185,11 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
         elif unit_id is not None:
-            unit = unit_queryset.get(id=unit_id)
-            unit_selected = unit
+            try:
+                unit = unit_queryset.get(id=unit_id)
+            except Unit.DoesNotExist:
+                raise NotFound('unit with id not found')
+            unit_selected = unit_queryset.filter(id=unit_id)
             if unit.type == 1:  # line
                 unit_selected = unit_queryset.filter(parent=unit)
             elif unit.type == 0:  # city

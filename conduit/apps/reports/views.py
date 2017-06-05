@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework.response import Response
 
 from .models import (Report, DeviceReport)
+from conduit.apps.units.models import (Unit,)
 from .serializers import (ReportSerializer,DeviceReportSerializer)
 from .renderers import (ReportJSONRenderer,DeviceReportJSONRenderer)
 
@@ -38,7 +39,7 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
-
+        unit_queryset = Unit.objects.all()
         if self.request.user.is_superuser is not True:
             ownerQ = Q(unit__owner=self.request.user)
             operatorQ = Q(unit__operators__id__contains=self.request.user.id)
@@ -55,7 +56,13 @@ class ReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
         elif unit_id is not None:
-            queryset = queryset.filter(unit__id=unit_id)
+            unit = unit_queryset.get(id=unit_id)
+            unit_selected = unit
+            if unit.type == 1:      #line
+                unit_selected = unit_queryset.filter(parent=unit)
+            elif unit.type == 0:    #city
+                unit_selected = unit_queryset.filter(parent__parent=unit)
+            queryset = queryset.filter(unit__in=unit_selected)
         return queryset
 
     def list(self, request):
@@ -158,6 +165,7 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+        unit_queryset = Unit.objects.all()
 
         if self.request.user.is_superuser is not True:
             ownerQ = Q(unit__owner=self.request.user)
@@ -174,7 +182,13 @@ class DeviceReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
         elif unit_id is not None:
-            queryset = queryset.filter(unit__id=unit_id)
+            unit = unit_queryset.get(id=unit_id)
+            unit_selected = unit
+            if unit.type == 1:  # line
+                unit_selected = unit_queryset.filter(parent=unit)
+            elif unit.type == 0:  # city
+                unit_selected = unit_queryset.filter(parent__parent=unit)
+            queryset = queryset.filter(unit__in=unit_selected)
         return queryset
 
     def list(self, request):

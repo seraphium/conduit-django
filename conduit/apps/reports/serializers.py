@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from collections import OrderedDict
 from .models import (Report, DeviceReport)
+from conduit.apps.authentication.models import User
 from conduit.apps.units.models import Unit
 
 
@@ -19,18 +20,22 @@ class ReportSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         unit_id = self.context['unit_id']
+        ackoperator_id = self.context['ackoperator_id']
+        ackop = User.objects.get(id=ackoperator_id) or None
         unit = Unit.objects.get(id=unit_id) or None
-        report = Report.objects.create(unit=unit, **validated_data)
+        report = Report.objects.create(unit=unit, ackoperator=ackop, **validated_data)
         return report
 
     def update(self, instance, validated_data):
         unit_id = self.context['unit_id']
-
+        ackoperator_id = self.context['ackoperator_id']
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
         unit = Unit.objects.get(id=unit_id) or None
+        ackop = User.objects.get(id=ackoperator_id) or None
         instance.unit = unit
+        instance.ackoperator = ackop
         instance.save()
 
         return instance

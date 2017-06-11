@@ -117,8 +117,10 @@ class UnitSerializer(serializers.ModelSerializer):
             raise NotFound('operator with id does not exists.')
 
         instance.operators = operators
-        instance.alertsettings.save()
-        instance.networksettings.save()
+        if hasattr(instance, 'alertsettings'):
+            instance.alertsettings.save()
+        if hasattr(instance, 'networksettings'):
+            instance.networksettings.save()
         instance.save()
         return instance
 

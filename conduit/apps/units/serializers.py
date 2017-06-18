@@ -90,18 +90,18 @@ class UnitSerializer(serializers.ModelSerializer):
         operators_id = self.context['operators']
         owner = self.context['owner']
         parent = self.context['parent']
+        if parent is not None:
+            try:
+                parentUnit = Unit.objects.get(id=parent)
+            except Unit.DoesNotExist:
+                raise NotFound('parent unit with id does not exists.')
 
-        unit = Unit.objects.create(owner=owner, **validated_data)
+        unit = Unit.objects.create(owner=owner, parent=parentUnit, **validated_data)
 
         alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
         network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
         unit.alertsettings = alert
         unit.networksettings = network
-        if parent is not None:
-            try:
-                unit.parent = Unit.objects.get(id=parent)
-            except Unit.DoesNotExist:
-                raise NotFound('parent unit with id does not exists.')
 
 
         unit.operators = [User.objects.get(id=id) for id in operators_id]

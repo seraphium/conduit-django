@@ -160,7 +160,7 @@ class UnitSerializer(serializers.ModelSerializer):
             'alertsettings',
             'networksettings',
         )
-        read_only_fields = ('owner', 'type', 'updated_at')
+        read_only_fields = ('owner', 'updated_at')
 
     def get_parent_id(self, instance):
         return instance.parent.id if instance.parent else None

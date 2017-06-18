@@ -27,6 +27,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
 
         serializer_context = {
             'owner': request.user,
+            'parent': serializer_data.get('parent', None),
             'request': request,
             'operators': serializer_data['operators']
         }

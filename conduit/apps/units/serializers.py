@@ -85,11 +85,12 @@ class UnitSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-        alertsettings = validated_data.pop('alertsettings', {})
-        networksettings = validated_data.pop('networksettings', {})
+        alertsettings = validated_data.pop('alertsettings', None)
+        networksettings = validated_data.pop('networksettings', None)
         operators_id = self.context['operators']
         owner = self.context['owner']
         parent = self.context['parent']
+        parentUnit = None;
         if parent is not None:
             try:
                 parentUnit = Unit.objects.get(id=parent)
@@ -97,12 +98,12 @@ class UnitSerializer(serializers.ModelSerializer):
                 raise NotFound('parent unit with id does not exists.')
 
         unit = Unit.objects.create(owner=owner, parent=parentUnit, **validated_data)
-
-        alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
-        network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
-        unit.alertsettings = alert
-        unit.networksettings = network
-
+        if alertsettings is not None:
+            alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
+            unit.alertsettings = alert
+        if networksettings is not None:
+            network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
+            unit.networksettings = network
 
         unit.operators = [User.objects.get(id=id) for id in operators_id]
 

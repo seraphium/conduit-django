@@ -85,18 +85,27 @@ class UnitSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-        alertsettings = validated_data.pop('alertsettings', {})
-        networksettings = validated_data.pop('networksettings', {})
+        alertsettings = validated_data.pop('alertsettings', None)
+        networksettings = validated_data.pop('networksettings', None)
         operators_id = self.context['operators']
         owner = self.context['owner']
-        unit = Unit.objects.create(owner=owner, **validated_data)
+        parent = self.context['parent']
+        parentUnit = None;
+        if parent is not None:
+            try:
+                parentUnit = Unit.objects.get(id=parent)
+            except Unit.DoesNotExist:
+                raise NotFound('parent unit with id does not exists.')
 
-        alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
-        network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
-        unit.alertsettings = alert
-        unit.networksettings = network
+        unit = Unit.objects.create(owner=owner, parent=parentUnit, **validated_data)
+        if alertsettings is not None:
+            alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
+            unit.alertsettings = alert
+        if networksettings is not None:
+            network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
+            unit.networksettings = network
 
-        unit.operators = [User.objects.get(id = id) for id in operators_id]
+        unit.operators = [User.objects.get(id=id) for id in operators_id]
 
         return unit
 
@@ -117,8 +126,10 @@ class UnitSerializer(serializers.ModelSerializer):
             raise NotFound('operator with id does not exists.')
 
         instance.operators = operators
-        instance.alertsettings.save()
-        instance.networksettings.save()
+        if hasattr(instance, 'alertsettings'):
+            instance.alertsettings.save()
+        if hasattr(instance, 'networksettings'):
+            instance.networksettings.save()
         instance.save()
         return instance
 
@@ -158,7 +169,7 @@ class UnitSerializer(serializers.ModelSerializer):
             'alertsettings',
             'networksettings',
         )
-        read_only_fields = ('owner', 'type', 'updated_at')
+        read_only_fields = ('owner', 'updated_at')
 
     def get_parent_id(self, instance):
         return instance.parent.id if instance.parent else None

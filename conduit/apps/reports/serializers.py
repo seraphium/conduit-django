@@ -3,6 +3,7 @@ from collections import OrderedDict
 from .models import (Report, DeviceReport)
 from conduit.apps.units.models import Unit
 
+from rest_framework.exceptions import NotFound
 
 class ReportSerializer(serializers.ModelSerializer):
     unit_id = serializers.SerializerMethodField(method_name='get_unit')
@@ -17,7 +18,11 @@ class ReportSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         unit_id = self.context['unit_id']
-        unit = Unit.objects.get(id=unit_id) or None
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('unit with id not found')
+
         report = Report.objects.create(unit=unit, **validated_data)
         return report
 
@@ -26,8 +31,11 @@ class ReportSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('unit with id not found')
 
-        unit = Unit.objects.get(id=unit_id) or None
         instance.unit = unit
         instance.save()
 
@@ -79,7 +87,11 @@ class DeviceReportSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         unit_id = self.context['unit_id']
-        unit = Unit.objects.get(id=unit_id) or None
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('unit with id not found')
+
         devicereport = DeviceReport.objects.create(unit=unit, **validated_data)
         return devicereport
 
@@ -88,8 +100,12 @@ class DeviceReportSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound('unit with id not found')
 
-        unit = Unit.objects.get(id=unit_id) or None
+
         instance.unit = unit
         instance.save()
 

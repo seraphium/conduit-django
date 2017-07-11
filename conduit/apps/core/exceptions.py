@@ -16,7 +16,7 @@ def core_exception_handler(exc, context):
 
 
 def _handle_generic_error(exc, context, response):
-    response.data = {'errors': response.data}
+    response.data["success"] = False
     return response
 
 
@@ -26,9 +26,9 @@ def _handle_not_found_error(exc, context, response):
         error_key = view.queryset.model._meta.verbose_name
 
         response.data = {
-            'errors': {
-                error_key: response.data['detail']
-            }
+            'success' : False,
+             error_key: response.data['detail']
+
         }
     else:
         response = _handle_generic_error(exc, context, response)

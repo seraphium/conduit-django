@@ -118,8 +118,10 @@ class ReportUpdateAPIView(generics.UpdateAPIView):
                                             partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        result = {
+            "success": True,
+            "report": serializer.data}
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class ReportDeleteAPIView(generics.DestroyAPIView):

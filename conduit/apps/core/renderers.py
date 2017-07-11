@@ -14,7 +14,7 @@ class ConduitJSONRenderer(JSONRenderer):
                self.pagination_object_label: data['results'],
                self.pagination_count_label: data['count']
            })
-        elif data.get('errors', None) is not None:
+        elif data.get('success', None) is False:
             return super(ConduitJSONRenderer, self).render(data)
 
         else:

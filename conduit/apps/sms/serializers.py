@@ -5,7 +5,6 @@ from conduit.apps.units.models import Unit
 from rest_framework.exceptions import NotFound
 from django.db.models import Q
 
-
 class SmsSerializer(serializers.ModelSerializer):
     device_id = serializers.SerializerMethodField(method_name='get_device')
 
@@ -30,8 +29,11 @@ class SmsSerializer(serializers.ModelSerializer):
             device = queryset.get(id=device_id) if device_id is not None else None
         except Unit.DoesNotExist:
             raise NotFound('Unit with device id not found or not owner/operator')
+        try:
+            sms = Sms.objects.create(device=device, **validated_data)
+        except BaseException as e:
+            raise serializers.ValidationError(str(e))
 
-        sms = Sms.objects.create(device=device, **validated_data)
         return sms
 
     def update(self, instance, validated_data):

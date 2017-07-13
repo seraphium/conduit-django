@@ -3,6 +3,7 @@ from collections import OrderedDict
 from .models import (Report, DeviceReport)
 from conduit.apps.authentication.models import User
 from conduit.apps.units.models import Unit
+from rest_framework.exceptions import NotFound
 
 
 class ReportSerializer(serializers.ModelSerializer):
@@ -20,20 +21,34 @@ class ReportSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         unit_id = self.context['unit_id']
-        ackoperator_id = self.context['ackoperator_id']
-        ackop = User.objects.get(id=ackoperator_id) or None
-        unit = Unit.objects.get(id=unit_id) or None
+        ackoperator_id = self.context.get('ackoperator_id', None)
+        if ackoperator_id is not None:
+            try:
+                ackop = User.objects.get(id=ackoperator_id)
+            except User.DoesNotExist:
+                raise NotFound("user with id not found")
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
         report = Report.objects.create(unit=unit, ackoperator=ackop, **validated_data)
         return report
 
     def update(self, instance, validated_data):
         unit_id = self.context['unit_id']
-        ackoperator_id = self.context['ackoperator_id']
+        ackoperator_id = self.context.get('ackoperator_id', None)
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
+        if ackoperator_id is not None:
+            try:
+                ackop = User.objects.get(id=ackoperator_id)
+            except User.DoesNotExist:
+                raise NotFound("user with id not found")
 
-        unit = Unit.objects.get(id=unit_id) or None
-        ackop = User.objects.get(id=ackoperator_id) or None
         instance.unit = unit
         instance.ackoperator = ackop
         instance.save()
@@ -92,7 +107,11 @@ class DeviceReportSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         unit_id = self.context['unit_id']
-        unit = Unit.objects.get(id=unit_id) or None
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
+
         devicereport = DeviceReport.objects.create(unit=unit, **validated_data)
         return devicereport
 
@@ -101,8 +120,11 @@ class DeviceReportSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
 
-        unit = Unit.objects.get(id=unit_id) or None
         instance.unit = unit
         instance.save()
 

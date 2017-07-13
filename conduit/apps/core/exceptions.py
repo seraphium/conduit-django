@@ -16,7 +16,14 @@ def core_exception_handler(exc, context):
 
 
 def _handle_generic_error(exc, context, response):
-    response.data["success"] = False
+    error = response.data.get('error', None) if isinstance(response.data, dict) else response.data
+    if error is None:
+        error = response.data
+
+    response.data = {
+        "success": False,
+        "errors":  error
+    }
     return response
 
 

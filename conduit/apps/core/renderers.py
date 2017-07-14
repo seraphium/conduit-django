@@ -11,6 +11,7 @@ class ConduitJSONRenderer(JSONRenderer):
     def render(self, data, media_type=None,  renderer_context=None):
         if data.get('results', None) is not None:
             return json.dumps({
+                "success": True,
                self.pagination_object_label: data['results'],
                self.pagination_count_label: data['count']
            })
@@ -19,6 +20,7 @@ class ConduitJSONRenderer(JSONRenderer):
 
         else:
             return json.dumps({
+                "success": True,
                 self.object_label: data
             })
 

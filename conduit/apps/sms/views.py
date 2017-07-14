@@ -18,7 +18,7 @@ class SmsViewSet(mixins.CreateModelMixin,
     lookup_field = 'id'
     queryset = Sms.objects.all()
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = SmsSerializer
 
     renderer_classes = (SmsJSONRenderer, )

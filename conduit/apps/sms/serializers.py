@@ -18,17 +18,18 @@ class SmsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request', None)
         device_id = self.context.get('device_id', None)
-        queryset = Unit.objects.all()
-        # device_id must in owner/opeator's unit list
-        if request.user.is_superuser is not True:
-            ownerQ = Q(owner=request.user)
-            operatorQ = Q(operators__id__contains=request.user.id)
-            queryset = queryset.filter(ownerQ | operatorQ)
-
-        try:
-            device = queryset.get(id=device_id) if device_id is not None else None
-        except Unit.DoesNotExist:
-            raise NotFound('Unit with device id not found or not owner/operator')
+        device = None
+        if device_id is not None:
+            queryset = Unit.objects.all()
+            # device_id must in owner/opeator's unit list
+            if request.user.is_anonymous() is not True and request.user.is_superuser is not True:
+                ownerQ = Q(owner=request.user)
+                operatorQ = Q(operators__id__contains=request.user.id)
+                queryset = queryset.filter(ownerQ | operatorQ)
+            try:
+                device = queryset.get(id=device_id) if device_id is not None else None
+            except Unit.DoesNotExist:
+                raise NotFound('Unit with device id not found or not owner/operator')
         try:
             sms = Sms.objects.create(device=device, **validated_data)
         except BaseException as e:

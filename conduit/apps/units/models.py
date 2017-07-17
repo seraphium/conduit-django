@@ -52,6 +52,7 @@ class UnitAlertSettings(TimestampModel):
     picresolution = models.CharField(max_length=32, default="800x600")
     picenable = models.BooleanField(default=True)
     piclightenhance = models.BooleanField(default=True)
+    picinterval = models.SmallIntegerField(default=0)
     highsensitivity = models.BooleanField(default=False)
     beep = models.BooleanField(default=True)
     weather = models.BooleanField(default=False)

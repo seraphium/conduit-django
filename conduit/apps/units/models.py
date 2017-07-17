@@ -14,6 +14,12 @@ class Unit(TimestampModel):
     backphoneused = models.BooleanField(max_length=32, default=False)
     sn = models.CharField(db_index=True, max_length=32, blank=True)
     location = models.CharField(db_index=True, max_length=32, blank=True)
+    province = models.CharField(db_index=True, max_length=32, blank=True)
+    city = models.CharField(db_index=True, max_length=32, blank=True)
+    district = models.CharField(db_index=True, max_length=32, blank=True)
+    location = models.CharField(db_index=True, max_length=32, blank=True)
+
+
     towerfrom = models.IntegerField(blank=True, null=True)
     towerto = models.IntegerField(blank=True, null=True)
     idintower = models.IntegerField(blank=True, null=True)

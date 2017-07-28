@@ -1,46 +1,44 @@
 from django.contrib import admin
 from conduit.apps.units.models import Unit
 from conduit.apps.units.models import UnitNetworkSettings
-from conduit.apps.units.models import UnitAlertSettings
+from conduit.apps.units.models import UnitAlarmSettings
+from conduit.apps.units.models import UnitCameraSettings
 
 
 class UnitAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'phonenum','identity','towerfrom', 'towerto', 'idintower',
-                    'parent', 'owner', 'get_alertsettings_distance1', 'get_alertsettings_distance2',
-                    'get_alertsettings_distance3', 'status', 'updated_at')
+    list_display = ('id', 'name', 'phoneNum','identity','towerFrom', 'towerTo', 'idInTower',
+                    'parent', 'owner', 'get_alarmsettings_distance1', 'get_alarmsettings_distance2',
+                    'get_alarmsettings_distance3', 'status', 'updated_at')
 
-    def get_alertsettings_distance1(self, obj):
-        return obj.alertsettings.alertdistance1
+    def get_alarmsettings_distance1(self, obj):
+        return obj.alarmSettings.almDistSet1
 
-    get_alertsettings_distance1.short_description = 'Distance1'
-    get_alertsettings_distance1.admin_order_field = 'alertsettings__distance1'
+    get_alarmsettings_distance1.short_description = 'Distance1'
+    get_alarmsettings_distance1.admin_order_field = 'alarmsettings__almDistSet1'
 
-    def get_alertsettings_distance2(self, obj):
-        return obj.alertsettings.alertdistance2
+    def get_alarmsettings_distance2(self, obj):
+        return obj.alarmSettings.almDistSet2
 
-    get_alertsettings_distance2.short_description = 'Distance2'
-    get_alertsettings_distance2.admin_order_field = 'alertsettings__distance2'
+    get_alarmsettings_distance2.short_description = 'Distance2'
+    get_alarmsettings_distance2.admin_order_field = 'alarmsettings__almDistSet2'
 
-    def get_alertsettings_distance3(self, obj):
-        return obj.alertsettings.alertdistance3
+    def get_alarmsettings_distance3(self, obj):
+        return obj.alarmSettings.almDistSet3
 
-    get_alertsettings_distance3.short_description = 'Distance3'
-    get_alertsettings_distance3.admin_order_field = 'alertsettings__distance3'
+    get_alarmsettings_distance3.short_description = 'Distance3'
+    get_alarmsettings_distance3.admin_order_field = 'alarmsettings__almDistSet3'
 
-class UnitAlertSettingsAdmin(admin.ModelAdmin):
-    list_display = ('unit', 'alertdistance1', 'alertdistance2', 'alertdistance3', 'picresolution', 'picenable',
-                    'piclightenhance', 'highsensitivity','beep', 'weather', 'mode',
-                    'camera1mode','camera1videoduration', 'camera1videoframerate', 'camera1mediainterval',
-                    'camera2mode','camera2videoduration','camera2videoframerate','camera2mediainterval',
-                    'camera3mode','camera3videoduration', 'camera3videoframerate','camera3mediainterval',)
+class UnitAlarmSettingsAdmin(admin.ModelAdmin):
+    list_display = ('unit', 'almDistSet1', 'almDistSet2', 'almDistSet3', 'beepEnable', 'weatherMask', 'sensMode')
 
 class UnitNetworkSettingsAdmin(admin.ModelAdmin):
-    list_display = ('unit', 'serverip', 'serverport', 'transfertype', 'networktype', 'apn',
-                    'apnusername', 'apnpassword','timeout', 'retrycount', 'resetcount',
-                    'csq','networkstatus')
+    list_display = ('unit', 'serverIp', 'serverPort')
 
+class UnitCameraSettingsAdmin(admin.ModelAdmin):
+    list_display = ('unit', 'camEnable1', 'camMode1', 'camEnable2', 'camMode2', 'camEnable3', 'camMode3')
 
 admin.site.register(Unit, UnitAdmin)
-admin.site.register(UnitAlertSettings, UnitAlertSettingsAdmin)
+admin.site.register(UnitAlarmSettings, UnitAlarmSettingsAdmin)
 admin.site.register(UnitNetworkSettings, UnitNetworkSettingsAdmin)
+admin.site.register(UnitCameraSettings, UnitCameraSettingsAdmin)
 

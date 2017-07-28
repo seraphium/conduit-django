@@ -1,44 +1,65 @@
 from rest_framework import serializers
 from collections import OrderedDict
-from .models import Unit, UnitAlertSettings, UnitNetworkSettings
+from .models import Unit, UnitAlarmSettings, UnitNetworkSettings, UnitCameraSettings
 from conduit.apps.authentication.models import User
 from rest_framework.exceptions import NotFound
 
-class UnitAlertSettingsSerializer(serializers.ModelSerializer):
+class UnitAlarmSettingsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
-        ret = super(UnitAlertSettingsSerializer, self).to_representation(instance)
+        ret = super(UnitAlarmSettingsSerializer, self).to_representation(instance)
         # Here we filter the null values and creates a new dictionary
         # We use OrderedDict like in original method
         ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
         return ret
 
     class Meta:
-        model = UnitAlertSettings
+        model = UnitAlarmSettings
         fields = (
-       #     'unit',
-            'alertdistance1',
-            'alertdistance2',
-            'alertdistance3',
-            'picresolution',
-            'picenable',
-            'piclightenhance',
-            'highsensitivity',
-            'beep',
-            'weather',
-            'mode',
-            'camera1mode',
-            'camera1videoduration',
-            'camera1videoframerate',
-            'camera1mediainterval',
-            'camera2mode',
-            'camera2videoduration',
-            'camera2videoframerate',
-            'camera2mediainterval',
-            'camera3mode',
-            'camera3videoduration',
-            'camera3videoframerate',
-            'camera3mediainterval',
+            'almDistSet1',
+            'almDistSet2',
+            'almDistSet3',
+            'sensMode',
+            'beepEnable',
+            'weatherMask'
+        )
+
+class UnitCameraSettingsSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        ret = super(UnitCameraSettingsSerializer, self).to_representation(instance)
+        # Here we filter the null values and creates a new dictionary
+        # We use OrderedDict like in original method
+        ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
+        return ret
+
+    class Meta:
+        model = UnitCameraSettings
+        fields = (
+            "camEnable1",
+            "camLgtEnhance1",
+            "camMode1",
+            "camResolution1",
+            "camFrameRate1",
+            "camVideoTimeLen1",
+            "camTimingIntv11",
+
+            "camEnable2",
+            "camLgtEnhance2",
+            "camMode2",
+            "camResolution2",
+            "camFrameRate2",
+            "camVideoTimeLen2",
+            "camTimingIntv12",
+
+            "camEnable3",
+            "camLgtEnhance3",
+            "camMode3",
+            "camResolution3",
+            "camFrameRate3",
+            "camVideoTimeLen3",
+            "camTimingIntv13"
+
         )
 
 
@@ -54,18 +75,11 @@ class UnitNetworkSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitNetworkSettings
         fields = (
-            'serverip',
-            'serverport',
-            'transfertype',
-            'networktype',
-            'apn',
-            'apnusername',
-            'apnpassword',
-            'timeout',
-            'retrycount',
-            'resetcount',
-            'csq',
-            'networkstatus',
+            'serverIp',
+            'serverPort',
+            'gsmApn',
+            'gsmUserName',
+            'gsmPassword'
         )
 
 
@@ -74,8 +88,9 @@ class UnitSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField(method_name='get_owner_id')
     operators = serializers.SerializerMethodField(method_name='get_operators_id')
 
-    alertsettings = UnitAlertSettingsSerializer(required=False)
-    networksettings = UnitNetworkSettingsSerializer(required=False)
+    alarmSettings = UnitAlarmSettingsSerializer(required=False)
+    networkSettings = UnitNetworkSettingsSerializer(required=False)
+    cameraSettings = UnitCameraSettingsSerializer(required=False)
 
     def to_representation(self, instance):
         ret = super(UnitSerializer, self).to_representation(instance)
@@ -85,8 +100,9 @@ class UnitSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-        alertsettings = validated_data.pop('alertsettings', None)
-        networksettings = validated_data.pop('networksettings', None)
+        alarmSettings = validated_data.pop('alarmSettings', None)
+        networkSettings = validated_data.pop('networkSettings', None)
+        cameraSettings = validated_data.pop('cameraSettings', None)
         operators_id = self.context['operators']
         owner = self.context['owner']
         parent = self.context['parent']
@@ -98,38 +114,47 @@ class UnitSerializer(serializers.ModelSerializer):
                 raise NotFound('parent unit with id does not exists.')
 
         unit = Unit.objects.create(owner=owner, parent=parentUnit, **validated_data)
-        if alertsettings is not None:
-            alert = UnitAlertSettings.objects.create(unit=unit, **alertsettings)
-            unit.alertsettings = alert
-        if networksettings is not None:
-            network = UnitNetworkSettings.objects.create(unit=unit, **networksettings)
-            unit.networksettings = network
+        if alarmSettings is not None:
+            alert = UnitAlarmSettings.objects.create(unit=unit, **alarmSettings)
+            unit.alarmSettings = alert
+        if networkSettings is not None:
+            network = UnitNetworkSettings.objects.create(unit=unit, **networkSettings)
+            unit.networkSettings = network
+        if cameraSettings is not None:
+            camera = UnitCameraSettings.objects.create(unit=unit, **cameraSettings)
+            unit.cameraSettings = camera
 
         unit.operators = [User.objects.get(id=id) for id in operators_id]
 
         return unit
 
     def update(self, instance, validated_data):
-        alertsettings = validated_data.pop('alertsettings', {})
-        networksettings = validated_data.pop('networksettings', {})
+        alarmSettings = validated_data.pop('alarmSettings', {})
+        networkSettings = validated_data.pop('networkSettings', {})
+        cameraSettings = validated_data.pop('cameraSettings', {})
+
         operators_id = self.context['operators']
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
-        for (key, value) in alertsettings.items():
+        for (key, value) in alarmSettings.items():
             setattr(instance.alertsettings, key, value)
-        for (key, value) in networksettings.items():
-            setattr(instance.networksettings, key, value)
+        for (key, value) in networkSettings.items():
+            setattr(instance.networkSettings, key, value)
+        for (key, value) in cameraSettings.items():
+            setattr(instance.cameraSettings, key, value)
         try:
             operators = [User.objects.get(id=id) for id in operators_id]
         except User.DoesNotExist:
             raise NotFound('operator with id does not exists.')
 
         instance.operators = operators
-        if hasattr(instance, 'alertsettings'):
-            instance.alertsettings.save()
-        if hasattr(instance, 'networksettings'):
-            instance.networksettings.save()
+        if hasattr(instance, 'alarmSettings'):
+            instance.alarmSettings.save()
+        if hasattr(instance, 'networkSettings'):
+            instance.networkSettings.save()
+        if hasattr(instance, 'cameraSettings'):
+            instance.cameraSettings.save()
         instance.save()
         return instance
 
@@ -142,32 +167,27 @@ class UnitSerializer(serializers.ModelSerializer):
             'type',
             'name',
             'voltage',
-            'phonenum',
-            'backphonenum',
-            'backphoneused',
+            'phoneNum',
+            'backPhoneNum',
+            'backPhoneUsed',
             'sn',
             'location',
-            'towerfrom',
-            'towerto',
-            'idintower',
+            'towerFrom',
+            'towerTo',
+            'idInTower',
             'identity',
-            'temperature',
-            'protocolversion',
-            'hardwareversion',
+            'protocolVersion',
+            'hardwareVersion',
             'lat',
             'lng',
-            'unsync',
-            'active',
             'operators',
             'status',
-            'powerstatus',
-            'gprsstatus',
             'carrier',
-            'backupcarrier',
-            'vendor',
+            'backupCarrier',
             'remark',
-            'alertsettings',
-            'networksettings',
+            'alarmSettings',
+            'networkSettings',
+            'cameraSettings'
         )
         read_only_fields = ('owner', 'updated_at')
 

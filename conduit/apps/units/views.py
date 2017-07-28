@@ -77,7 +77,7 @@ class UnitsViewSet(mixins.CreateModelMixin,
         try:
             serializer_instance = self.queryset.get(id=id)
         except Unit.DoesNotExist:
-            raise NotFound('An article with this slug does not exists.')
+            raise NotFound('An unit with this id does not exists.')
 
         serializer = self.serializer_class(serializer_instance,
                                            context=serializer_context)
@@ -113,14 +113,13 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
 
 
 class UnitDeleteAPIView(generics.DestroyAPIView):
-    lookup_url_kwarg = 'unit_id'
     permission_classes = (IsAuthenticated,)
     queryset = Unit.objects.all()
     serializer_class = UnitSerializer
 
-    def post(self, request, unit_id=None):
+    def post(self, request):
         try:
-            unit = Unit.objects.get(id=unit_id)
+            unit = Unit.objects.get(id=0)
         except Unit.DoesNotExist:
             raise NotFound('Unit with this ID does not exists.')
 

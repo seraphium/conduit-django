@@ -138,7 +138,7 @@ class UnitSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
         for (key, value) in alarmSettings.items():
-            setattr(instance.alertsettings, key, value)
+            setattr(instance.alarmSettings, key, value)
         for (key, value) in networkSettings.items():
             setattr(instance.networkSettings, key, value)
         for (key, value) in cameraSettings.items():

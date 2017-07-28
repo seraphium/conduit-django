@@ -7,12 +7,17 @@ class UnitJSONRenderer(ConduitJSONRenderer):
     pagination_count_label = 'unitsCount'
 
 
-class UnitAlertSettingsJSONRenderer(ConduitJSONRenderer):
-    object_label = 'alertsetting'
-    pagination_object_label = 'alertsettings'
-    pagination_count_label = 'alertsettingsCount'
+class UnitAlarmSettingsJSONRenderer(ConduitJSONRenderer):
+    object_label = 'alarmSettings'
+    pagination_object_label = 'alarmSettings'
+    pagination_count_label = 'alarmSettingsCount'
 
 class UnitNetworkSettingsJSONRenderer(ConduitJSONRenderer):
-    object_label = 'networksetting'
-    pagination_object_label = 'networksettings'
-    pagination_count_label = 'networksettingsCount'
+    object_label = 'networkSettings'
+    pagination_object_label = 'networkSettings'
+    pagination_count_label = 'networkSettingsCount'
+
+class UnitCameraSettingsJSONRenderer(ConduitJSONRenderer):
+    object_label = 'cameraSettings'
+    pagination_object_label = 'cameraSettings'
+    pagination_count_label = 'cameraSettingsCount'

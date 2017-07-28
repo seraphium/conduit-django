@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .models import Unit
 from .serializers import UnitSerializer
-from .renderers import UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer
+from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer, UnitCameraSettingsJSONRenderer
 from datetime import datetime
 from django.db.models import Q
 
@@ -14,12 +14,15 @@ class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.RetrieveModelMixin,
                      viewsets.GenericViewSet):
     lookup_field = 'id'
-    queryset = Unit.objects.select_related('alertsettings', 'networksettings')
+    queryset = Unit.objects.select_related('alarmSettings', 'networkSettings', 'cameraSettings')
 
     permission_classes = (IsAuthenticated,)
     serializer_class = UnitSerializer
 
-    renderer_classes = (UnitJSONRenderer, UnitAlertSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer)
+    renderer_classes = (UnitJSONRenderer,
+                        UnitAlarmSettingsJSONRenderer,
+                        UnitNetworkSettingsJSONRenderer,
+                        UnitCameraSettingsJSONRenderer)
 
     def create(self, request):
 

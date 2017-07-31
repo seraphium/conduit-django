@@ -119,10 +119,11 @@ class UnitDeleteAPIView(generics.DestroyAPIView):
 
     def post(self, request):
         try:
-            unit = Unit.objects.get(id=0)
+            unit_list = request.data.get('units', {})
+            units = [Unit.objects.get(id=unit_id) for unit_id in unit_list]
         except Unit.DoesNotExist:
             raise NotFound('Unit with this ID does not exists.')
-
-        unit.delete()
+        for unit in units:
+            unit.delete()
 
         return Response(None,  status=status.HTTP_204_NO_CONTENT)

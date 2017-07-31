@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
 from conduit.apps.units.serializers import UnitSerializer
+from rest_framework.exceptions import NotFound, ValidationError
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -58,13 +59,40 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
+    children_update = serializers.ListField(
+        write_only=True
+    )
     class Meta:
         model = User
-        fields = ('id', 'name', 'password', 'phonenum', 'dept', 'line', 'children')
-        read_only_fields = ('id',)
+        fields = ('id', 'name', 'password', 'phonenum', 'dept', 'line', 'children', 'children_update')
+        read_only_fields = ('id', 'children')
+
+    def getUserFilter(self, filter):
+        child = None
+        if isinstance(filter, int):
+            try:
+                child = User.objects.get(id=filter)
+                return child
+            except User.DoesNotExist:
+                pass
+        if isinstance(filter, str):
+            try:
+                child = User.objects.get(name=filter)
+                return child
+            except User.DoesNotExist:
+                pass
+            try:
+                child = User.objects.get(phonenum=filter)
+                return child
+            except User.DoesNotExist:
+                pass
+        if child is None:
+            raise NotFound('User with id/name/phonenum not found')
+
+
 
     def update(self, instance, validated_data):
-        children = validated_data.get('children', None)
+        children_update = validated_data.get('children_update', None)
 
         password = validated_data.pop('password', None)
 
@@ -73,7 +101,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
         if password is not None:
             instance.set_password(password)
-        if children is not None:
+        if children_update is not None:
+            children = []
+            for child_string in children_update:
+                child = self.getUserFilter(child_string)
+                if child == instance:
+                    raise ValidationError("cannot add children from logged user")
+                children.append(child)
             instance.children.set(children)
 
         instance.save()

@@ -29,7 +29,8 @@ class ReportViewSet(mixins.CreateModelMixin,
 
         serializer_context = {
             'request': request,
-            'unitId': serializer_data['unitId']
+            'unitId': serializer_data.get('unitId', None),
+            'unit_imei': serializer_data.get('gsm_imei', None)
         }
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
@@ -104,7 +105,7 @@ class ReportUpdateAPIView(generics.UpdateAPIView):
         unitId = serializer_data.get('unitId', None)
         ackoperatorId = serializer_data.get('ackOperatorId', None)
         serializer_context = {'request': request,
-                              'unit_id': unitId,
+                              'unitId': unitId,
                               'ackOperatorId': ackoperatorId}
 
         try:

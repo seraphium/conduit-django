@@ -20,7 +20,21 @@ class ReportSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
+        unit = None
         unitId = self.context['unitId']
+        if unitId is not None:
+            try:
+                unit = Unit.objects.get(id=unitId)
+            except Unit.DoesNotExist:
+                raise NotFound("unit with id not found")
+        unit_imei = self.context['unit_imei']
+        if unit_imei is not None:
+            try:
+                unit = Unit.objects.get(identity=unit_imei)
+            except Unit.DoesNotExist:
+                raise NotFound("unit with imei not found")
+        if unit is None:
+            raise NotFound('unit with id/imei not found')
         ackOperatorId = self.context.get('ackOperatorId', None)
         ackop = None
         if ackOperatorId is not None:
@@ -28,11 +42,8 @@ class ReportSerializer(serializers.ModelSerializer):
                 ackop = User.objects.get(id=ackOperatorId)
             except User.DoesNotExist:
                 raise NotFound("user with id not found")
-        try:
-            unit = Unit.objects.get(id=unitId)
-        except Unit.DoesNotExist:
-            raise NotFound("unit with id not found")
-        report = Report.objects.create(unit=unit, ackoperator=ackop, **validated_data)
+
+        report = Report.objects.create(unit=unit, ackOperator=ackop, **validated_data)
         return report
 
     def update(self, instance, validated_data):

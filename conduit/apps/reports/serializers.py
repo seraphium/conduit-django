@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from collections import OrderedDict
-from .models import (Report, DeviceReport)
+from .models import (Report, )
 from conduit.apps.authentication.models import User
 from conduit.apps.units.models import Unit
 from rest_framework.exceptions import NotFound
@@ -93,70 +93,3 @@ class ReportSerializer(serializers.ModelSerializer):
     def get_ackoperator(self, instance):
         return instance.ackoperator.id if instance.ackoperator else None
 
-
-class DeviceReportSerializer(serializers.ModelSerializer):
-    unit_id = serializers.SerializerMethodField(method_name='get_unitId')
-    unit_name = serializers.SerializerMethodField(method_name='get_unitName')
-
-    def to_representation(self, instance):
-        ret = super(DeviceReportSerializer, self).to_representation(instance)
-        # Here we filter the null values and creates a new dictionary
-        # We use OrderedDict like in original method
-        ret = OrderedDict(list(filter(lambda x: x[1] is not None, ret.items())))
-        return ret
-
-    def create(self, validated_data):
-        unit_id = self.context['unit_id']
-        try:
-            unit = Unit.objects.get(id=unit_id)
-        except Unit.DoesNotExist:
-            raise NotFound("unit with id not found")
-
-        devicereport = DeviceReport.objects.create(unit=unit, **validated_data)
-        return devicereport
-
-    def update(self, instance, validated_data):
-        unit_id = self.context['unit_id']
-
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
-        try:
-            unit = Unit.objects.get(id=unit_id)
-        except Unit.DoesNotExist:
-            raise NotFound("unit with id not found")
-
-        instance.unit = unit
-        instance.save()
-
-        return instance
-
-    class Meta:
-        model = DeviceReport
-        fields = (
-            'id',
-            'unit_id',
-            'unit_name',
-            'time',
-            'temperature',
-            'csq',
-            'mode',
-            'resetcount',
-            'networkstatus',
-            'protocolversion',
-            'hardwareversion',
-            'softwareversion',
-            'picresolution',
-            'picenable',
-            'piclightenhance',
-            'highsensitivity',
-            'beep',
-            'status',
-            'powerstatus',
-            'gprsstatus',
-        )
-
-    def get_unitId(self, instance):
-        return instance.unit.id if instance.unit else None
-
-    def get_unitName(self, instance):
-        return instance.unit.name if instance.unit else None

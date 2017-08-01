@@ -18,7 +18,7 @@ class ReportViewSet(mixins.CreateModelMixin,
     lookup_field = 'id'
     queryset = Report.objects.all()
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = ReportSerializer
 
     renderer_classes = (ReportJSONRenderer, )
@@ -35,8 +35,7 @@ class ReportViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"reports": serializer.data}, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
         queryset = self.queryset

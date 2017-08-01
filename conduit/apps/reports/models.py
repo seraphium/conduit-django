@@ -19,7 +19,7 @@ class Report(TimestampModel):
     ackOperator = models.ForeignKey('authentication.User', null=True, blank=True,related_name='ackedreports', on_delete=models.CASCADE)
     ackDetail = models.CharField(max_length=64, blank=True)
     mediaGuid = models.CharField(max_length=64, blank=True)
-    hasNedia = models.BooleanField(default=False)
+    hasMedia = models.BooleanField(default=False)
     infoId = models.IntegerField(null=True)
     weather = models.CharField(max_length=64, blank=True)
     mediaTypeCamera1 = models.SmallIntegerField(null=True, blank=True)

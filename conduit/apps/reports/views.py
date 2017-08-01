@@ -29,7 +29,7 @@ class ReportViewSet(mixins.CreateModelMixin,
 
         serializer_context = {
             'request': request,
-            'unit_id': serializer_data['unit_id']
+            'unitId': serializer_data['unitId']
         }
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
@@ -48,19 +48,19 @@ class ReportViewSet(mixins.CreateModelMixin,
         lasttime_string = self.request.query_params.get('lasttime', None)
 
         id = self.request.query_params.get('id', None)
-        unit_id = self.request.query_params.get('unit_id', None)
+        unitId = self.request.query_params.get('unitId', None)
 
         if id is not None:
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(updated_at__gt=lasttime)
-        elif unit_id is not None:
+        elif unitId is not None:
             try:
-                unit = unit_queryset.get(id=unit_id)
+                unit = unit_queryset.get(id=unitId)
             except Unit.DoesNotExist:
                 raise NotFound('unit with id not found')
-            unit_selected = unit_queryset.filter(id=unit_id)
+            unit_selected = unit_queryset.filter(id=unitId)
             if unit.type == 1:      #line
                 unit_selected = unit_queryset.filter(parent=unit)
             elif unit.type == 0:    #city
@@ -101,11 +101,11 @@ class ReportUpdateAPIView(generics.UpdateAPIView):
     def post(self, request, report_id=None):
 
         serializer_data = request.data.get('report', {})
-        unit_id = serializer_data.get('unit_id', None)
-        ackoperator_id = serializer_data.get('ackoperator_id', None)
+        unitId = serializer_data.get('unitId', None)
+        ackoperatorId = serializer_data.get('ackOperatorId', None)
         serializer_context = {'request': request,
-                              'unit_id': unit_id,
-                              'ackoperator_id': ackoperator_id }
+                              'unit_id': unitId,
+                              'ackOperatorId': ackoperatorId}
 
         try:
             serializer_instance = self.queryset.get(id=report_id)

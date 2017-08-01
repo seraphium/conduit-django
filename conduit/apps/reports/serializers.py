@@ -7,10 +7,10 @@ from rest_framework.exceptions import NotFound
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    unit_id = serializers.SerializerMethodField(method_name='get_unitId')
-    unit_name = serializers.SerializerMethodField(method_name='get_unitName')
+    unitId = serializers.SerializerMethodField()
 
-    ackoperator_id = serializers.SerializerMethodField(method_name='get_ackoperator')
+    ackOperatorId = serializers.SerializerMethodField(method_name='get_ackoperatorId')
+    ackOperatorName = serializers.SerializerMethodField(method_name='get_ackoperatorName')
 
     def to_representation(self, instance):
         ret = super(ReportSerializer, self).to_representation(instance)
@@ -20,37 +20,39 @@ class ReportSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-        unit_id = self.context['unit_id']
-        ackoperator_id = self.context.get('ackoperator_id', None)
-        if ackoperator_id is not None:
+        unitId = self.context['unitId']
+        ackOperatorId = self.context.get('ackOperatorId', None)
+        ackop = None
+        if ackOperatorId is not None:
             try:
-                ackop = User.objects.get(id=ackoperator_id)
+                ackop = User.objects.get(id=ackOperatorId)
             except User.DoesNotExist:
                 raise NotFound("user with id not found")
         try:
-            unit = Unit.objects.get(id=unit_id)
+            unit = Unit.objects.get(id=unitId)
         except Unit.DoesNotExist:
             raise NotFound("unit with id not found")
         report = Report.objects.create(unit=unit, ackoperator=ackop, **validated_data)
         return report
 
     def update(self, instance, validated_data):
-        unit_id = self.context['unit_id']
-        ackoperator_id = self.context.get('ackoperator_id', None)
+        unitId = self.context['unitId']
+        ackOperatorId = self.context.get('ackOperatorId', None)
+        ackop = None
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
         try:
-            unit = Unit.objects.get(id=unit_id)
+            unit = Unit.objects.get(id=unitId)
         except Unit.DoesNotExist:
             raise NotFound("unit with id not found")
-        if ackoperator_id is not None:
+        if ackOperatorId is not None:
             try:
-                ackop = User.objects.get(id=ackoperator_id)
+                ackop = User.objects.get(id=ackOperatorId)
             except User.DoesNotExist:
                 raise NotFound("user with id not found")
 
         instance.unit = unit
-        instance.ackoperator = ackop
+        instance.ackOperator = ackop
         instance.save()
 
         return instance
@@ -59,37 +61,59 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = (
             'id',
-            'unit_id',
-            'unit_name',
+            'unitId',
+            'gsm_imei',
             'time',
-            'distance1current',
-            'distance1quota',
-            'distance2current',
-            'distance2quota',
-            'distance3current',
-            'distance3quota',
+            'usDistMsr1',
+            'usDistAlmSet1',
+            'usDistMsr2',
+            'usDistAlmSet2',
+            'usDistMsr3',
+            'usDistAlmSet3',
             'message',
-            'isalert',
-            'acktime',
-            'ackmethod',
-            'ackoperator_id',
-            'ackdetail',
-            'mediaguid',
-            'hasmedia',
-            'statusid',
+            'isAlert',
+            'ackTime',
+            'ackMethod',
+            'ackOperatorId',
+            'ackOperatorName',
+            'ackDetail',
+            'mediaGuid',
+            'simpleGuid',
+            'simpleLength1',
+            'simpleLength2',
+            'simpleLength3',
+            'hasMedia',
+            'infoId',
             'weather',
-            'mediatypecamera1',
-            'mediatypecamera2',
-            'mediatypecamera3',
+            'mediaTypeCamera1',
+            'mediaTypeCamera2',
+            'mediaTypeCamera3',
+            'camFrameRate1',
+            'camVideoTimeLen1',
+            'camFrameRate2',
+            'camVideoTimeLen2',
+            'camFrameRate3',
+            'camVideoTimeLen3',
+            'beepEnable',
+            'CSQ',
+            'netState',
+            'dumpEnergy',
+            'powerLineVoltage',
+            'temp',
+            'hardwareVer',
+            'firmwareVer',
+            'powerLineCurr',
+            'powerLineTemp',
+            'powerLineVibr',
+
+
         )
 
     def get_unitId(self, instance):
         return instance.unit.id if instance.unit else None
 
-    def get_unitName(self, instance):
-        return instance.unit.name if instance.unit else None
+    def get_ackoperatorId(self, instance):
+        return instance.ackOperator.id if instance.ackOperator else None
 
-
-    def get_ackoperator(self, instance):
-        return instance.ackoperator.id if instance.ackoperator else None
-
+    def get_ackoperatorName(self, instance):
+        return instance.ackOperator.name if instance.ackOperator else None

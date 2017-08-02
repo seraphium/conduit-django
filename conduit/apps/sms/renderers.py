@@ -6,3 +6,7 @@ class SmsJSONRenderer(ConduitJSONRenderer):
     pagination_object_label = 'smss'
     pagination_count_label = 'smsCount'
 
+class CommandJSONRenderer(ConduitJSONRenderer):
+    object_label = 'command'
+    pagination_object_label = 'commands'
+    pagination_count_label = 'commandCount'

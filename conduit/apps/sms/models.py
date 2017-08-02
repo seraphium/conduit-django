@@ -2,6 +2,14 @@ from django.db import models
 from conduit.apps.core.models import TimestampModel
 
 
+class Command(TimestampModel):
+    unit = models.ForeignKey('units.Unit', null=False, related_name='commands', on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    type = models.SmallIntegerField(default=0)
+    parameter = models.SmallIntegerField(default=0)
+    def __str__(self):
+        return self.time.strftime('%b %d %Y %H:%M:%S') + ":" + str(self.type) + ":" + str(self.parameter)
+
 class Sms(TimestampModel):
     time = models.DateTimeField()
     content = models.CharField(max_length=255)

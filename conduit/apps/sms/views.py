@@ -3,9 +3,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from .models import Sms
-from .serializers import SmsSerializer
-from .renderers import SmsJSONRenderer
+from .models import Sms, Command
+from .serializers import SmsSerializer, CommandSerializer
+from .renderers import SmsJSONRenderer, CommandJSONRenderer
 
 from datetime import datetime
 from django.db.models import Q
@@ -113,3 +113,74 @@ class SmsUpdateAPIView(generics.UpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CommandViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     viewsets.GenericViewSet):
+    lookup_field = 'id'
+    queryset = Command.objects.all()
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommandSerializer
+
+    renderer_classes = (CommandJSONRenderer, )
+
+    def create(self, request):
+
+        serializer_data = request.data
+
+        serializer_context = {
+            'request': request,
+            'unitId': serializer_data.get('unitId', None)
+        }
+        serializer_data['time'] = datetime.now()
+        serializer = self.serializer_class(data=serializer_data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        if self.request.user.is_superuser is not True:
+            unitQ = Q(unit__in=self.request.user.ownedunits.all())
+            queryset = queryset.filter(unitQ)
+
+        id = self.request.query_params.get('id', None)
+        lasttime_string = self.request.query_params.get('lasttime', None)
+
+        if id is not None:
+            queryset = queryset.filter(id=id)
+        elif lasttime_string is not None:
+            lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
+            queryset = queryset.filter(updated_at__gt=lasttime)
+
+        return queryset
+
+    def list(self, request):
+        serializer_context = {'request': request}
+        page = self.paginate_queryset(self.get_queryset())
+
+        serializer = self.serializer_class(page,
+                                           context=serializer_context,
+                                           many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+
+    def retrieve(self, request, id):
+
+        serializer_context = {'request': request}
+
+        try:
+            serializer_instance = self.queryset.get(id=id)
+        except Command.DoesNotExist:
+            raise NotFound('An command with this id does not exists.')
+
+        serializer = self.serializer_class(serializer_instance,
+                                           context=serializer_context)
+
+        return Response(serializer.data, status = status.HTTP_200_OK)

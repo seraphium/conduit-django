@@ -1,4 +1,5 @@
 from rest_framework.views import exception_handler
+from rest_framework import status
 
 
 def core_exception_handler(exc, context):
@@ -24,6 +25,7 @@ def _handle_generic_error(exc, context, response):
         "success": False,
         "errors":  error
     }
+    response.status_code = status.HTTP_200_OK
     return response
 
 
@@ -35,8 +37,9 @@ def _handle_not_found_error(exc, context, response):
         response.data = {
             'success' : False,
              error_key: response.data['detail']
-
         }
+        response.status_code = status.HTTP_200_OK
+
     else:
         response = _handle_generic_error(exc, context, response)
 

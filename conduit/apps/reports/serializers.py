@@ -116,7 +116,7 @@ class ReportSerializer(serializers.ModelSerializer):
             'powerLineCurr',
             'powerLineTemp',
             'powerLineVibr',
-
+            'updated_at'
 
         )
 

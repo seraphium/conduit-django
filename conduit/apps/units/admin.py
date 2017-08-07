@@ -8,7 +8,7 @@ from conduit.apps.units.models import UnitCameraSettings
 class UnitAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'phoneNum','identity','towerFrom', 'towerTo', 'idInTower',
                     'parent', 'owner', 'get_alarmsettings_distance1', 'get_alarmsettings_distance2',
-                    'get_alarmsettings_distance3', 'status', 'updated_at')
+                    'get_alarmsettings_distance3', 'status', 'updatedAt')
 
     def get_alarmsettings_distance1(self, obj):
         return obj.alarmSettings.almDistSet1

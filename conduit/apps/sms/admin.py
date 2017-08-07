@@ -3,7 +3,7 @@ from conduit.apps.sms.models import (Sms, Command)
 
 
 class SmsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'time','content','sender', 'receiver', 'device',  'updated_at')
+    list_display = ('id', 'time','content','sender', 'receiver', 'device',  'updatedAt')
 
 
 class CommandAdmin(admin.ModelAdmin):

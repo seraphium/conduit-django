@@ -1,7 +1,8 @@
-from rest_framework import generics, mixins, status, viewsets
+from rest_framework import generics, mixins, status, viewsets, views
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.parsers import FileUploadParser
 
 from .models import (Report, )
 from conduit.apps.units.models import (Unit,)
@@ -140,3 +141,23 @@ class ReportDeleteAPIView(generics.DestroyAPIView):
 
         return Response(None,  status=status.HTTP_204_NO_CONTENT)
 
+
+class ImageUploadView(views.APIView):
+    permission_classes = (AllowAny,)
+    parser_classes = (FileUploadParser,)
+
+    def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
+        try:
+            unit = Unit.objects.get(identity=imei)
+            file_obj = request.data['file']
+            saving_path = '/tmp/'
+            with open(saving_path + file_obj.name, 'wb+') as destination:
+                for chunk in file_obj.chunks():
+                    destination.write(chunk)
+                    destination.close()
+        except Unit.DoesNotExist:
+            raise NotFound('unit with this imei does not exists.')
+        result = {
+            "result": "succeeded",
+            }
+        return Response(result, status=status.HTTP_200_OK)

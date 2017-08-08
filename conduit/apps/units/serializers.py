@@ -189,7 +189,7 @@ class UnitSerializer(serializers.ModelSerializer):
             'networkSettings',
             'cameraSettings'
         )
-        read_only_fields = ('owner', 'updated_at')
+        read_only_fields = ('owner', 'updatedAt')
 
     def get_parent_id(self, instance):
         return instance.parent.id if instance.parent else None

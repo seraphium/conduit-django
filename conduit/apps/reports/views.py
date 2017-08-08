@@ -142,7 +142,7 @@ class ReportDeleteAPIView(generics.DestroyAPIView):
         return Response(None,  status=status.HTTP_204_NO_CONTENT)
 
 
-class ImageUploadView(views.APIView):
+class ImageUploadView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     parser_classes = (FileUploadParser,)
 
@@ -150,6 +150,7 @@ class ImageUploadView(views.APIView):
         try:
             unit = Unit.objects.get(identity=imei)
             file_obj = request.data['file']
+            #picture handling logic
             saving_path = '/tmp/'
             with open(saving_path + file_obj.name, 'wb+') as destination:
                 for chunk in file_obj.chunks():
@@ -158,6 +159,6 @@ class ImageUploadView(views.APIView):
         except Unit.DoesNotExist:
             raise NotFound('unit with this imei does not exists.')
         result = {
-            "result": "succeeded",
-            }
+            "success": True
+        }
         return Response(result, status=status.HTTP_200_OK)

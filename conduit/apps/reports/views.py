@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets, views
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
@@ -8,11 +8,11 @@ from .models import (Report, )
 from conduit.apps.units.models import (Unit,)
 from .serializers import (ReportSerializer,)
 from .renderers import (ReportJSONRenderer,)
+from conduit.apps.webservices.oss import upload_to_oss
 
 import os,uuid
 from datetime import datetime, timedelta
 from django.db.models import Q
-import oss2
 
 class ReportViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -149,22 +149,6 @@ class ImageUploadView(generics.CreateAPIView):
     parser_classes = (FileUploadParser,)
 
     reportMediaBindingThresholdMin = 1000
-    accessKeyId = "LTAIxuJzCN49WyOx"
-    accessKeySecret = "YzU2GrECDsYFlePmGeqHAhFYejW5Q8 "
-    endpoint = "oss-cn-shanghai.aliyuncs.com"
-    defaultBucketName = "beacon-media"
-
-    def upload_to_oss(self, file_obj, mediaGuid, cameraid, frameid):
-        try:
-            filename = str.format("%s_%s_%s.jpg" % (mediaGuid, cameraid, frameid))
-
-            # aliyun oss service
-            auth = oss2.Auth(self.accessKeyId, self.accessKeySecret)
-            bucket = oss2.Bucket(auth, self.endpoint, self.defaultBucketName)
-            bucket.put_object(filename, file_obj)
-            print("picture uploaded to oss, filename=%s" % filename)
-        except Exception as e:
-            raise ValidationError('upload image failed ', e)
 
     def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
 
@@ -189,7 +173,7 @@ class ImageUploadView(generics.CreateAPIView):
 
         file_obj = request.data['file']
 
-        self.upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
+        upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
 
         # #picture handling logic
         # saving_path = '/tmp/'

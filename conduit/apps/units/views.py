@@ -8,6 +8,7 @@ from .serializers import UnitSerializer
 from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer, UnitCameraSettingsJSONRenderer
 from datetime import datetime
 from django.db.models import Q
+from django.forms.models import model_to_dict
 
 class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -127,3 +128,25 @@ class UnitDeleteAPIView(generics.DestroyAPIView):
             unit.delete()
 
         return Response(None,  status=status.HTTP_204_NO_CONTENT)
+
+
+class UnitSettingAPIView(generics.RetrieveAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Unit.objects.all()
+    serializer_class = UnitSerializer
+
+    def get(self, request):
+        try:
+            unit_imei = self.request.query_params.get('imei', None)
+
+            unit = Unit.objects.get(identity=unit_imei)
+        except Unit.DoesNotExist:
+            raise NotFound('Unit with this imei does not exists.')
+
+        response = {'settings': {
+            'alarmSettings': model_to_dict(unit.alarmSettings),
+            'cameraSettings': model_to_dict(unit.cameraSettings),
+            'networkSettings': model_to_dict(unit.networkSettings)
+        }}
+
+        return Response(response,  status=status.HTTP_200_OK)

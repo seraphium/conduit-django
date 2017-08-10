@@ -106,7 +106,7 @@ class UnitSerializer(serializers.ModelSerializer):
         operators_id = self.context['operators']
         owner = self.context['owner']
         parent = self.context['parent']
-        parentUnit = None;
+        parentUnit = None
         if parent is not None:
             try:
                 parentUnit = Unit.objects.get(id=parent)
@@ -187,7 +187,8 @@ class UnitSerializer(serializers.ModelSerializer):
             'remark',
             'alarmSettings',
             'networkSettings',
-            'cameraSettings'
+            'cameraSettings',
+            'updatedAt'
         )
         read_only_fields = ('owner', 'updatedAt')
 

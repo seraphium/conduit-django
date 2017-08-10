@@ -43,7 +43,7 @@ class ReportSerializer(serializers.ModelSerializer):
             except User.DoesNotExist:
                 raise NotFound("user with id not found")
 
-        report = Report.objects.create(unit=unit, ackOperator=ackop, **validated_data)
+        report = Report.objects.create(unit=unit, mediaGuid=mediaGuid, ackOperator=ackop, **validated_data)
         return report
 
     def update(self, instance, validated_data):

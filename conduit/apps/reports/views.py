@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets, views
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
@@ -9,8 +9,10 @@ from conduit.apps.units.models import (Unit,)
 from .serializers import (ReportSerializer,)
 from .renderers import (ReportJSONRenderer,)
 
-from datetime import datetime
+import os,uuid
+from datetime import datetime, timedelta
 from django.db.models import Q
+import oss2
 
 class ReportViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -146,18 +148,57 @@ class ImageUploadView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     parser_classes = (FileUploadParser,)
 
-    def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
+    reportMediaBindingThresholdMin = 1000
+    accessKeyId = "LTAIxuJzCN49WyOx"
+    accessKeySecret = "YzU2GrECDsYFlePmGeqHAhFYejW5Q8 "
+    endpoint = "oss-cn-shanghai.aliyuncs.com"
+    defaultBucketName = "beacon-media"
+
+    def upload_to_oss(self, file_obj, mediaGuid, cameraid, frameid):
         try:
-            unit = Unit.objects.get(identity=imei)
-            file_obj = request.data['file']
-            #picture handling logic
-            saving_path = '/tmp/'
-            with open(saving_path + file_obj.name, 'wb+') as destination:
-                for chunk in file_obj.chunks():
-                    destination.write(chunk)
-                    destination.close()
-        except Unit.DoesNotExist:
-            raise NotFound('unit with this imei does not exists.')
+            filename = str.format("%s_%s_%s.jpg" % (mediaGuid, cameraid, frameid))
+
+            # aliyun oss service
+            auth = oss2.Auth(self.accessKeyId, self.accessKeySecret)
+            bucket = oss2.Bucket(auth, self.endpoint, self.defaultBucketName)
+            bucket.put_object(filename, file_obj)
+            print("picture uploaded to oss, filename=%s" % filename)
+        except Exception as e:
+            raise ValidationError('upload image failed ', e)
+
+    def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
+
+        report = None
+
+        #update report
+        time_low = datetime.now() - timedelta(minutes=self.reportMediaBindingThresholdMin)
+        report = Report.objects.filter(Q(unit__identity=imei), Q(infoId=statusid), Q(time__gt=time_low)).first()
+        if report is None:
+            raise Report.DoesNotExist
+        if cameraid == '1':
+            report.mediaTypeCamera1 = mode
+        if cameraid == '2':
+            report.mediaTypeCamera2 = mode
+        if cameraid == '3':
+            report.mediaTypeCamera3 = mode
+        report.hasMedia = True
+        if report.mediaGuid is None or report.mediaGuid == '':
+            report.mediaGuid = uuid.uuid4().hex
+
+        report.save()
+
+        file_obj = request.data['file']
+
+        self.upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
+
+        # #picture handling logic
+        # saving_path = '/tmp/'
+        # full_path = os.path.join(saving_path, file_obj.name)
+        # with open(full_path, 'wb+') as destination:
+        #     for chunk in file_obj.chunks():
+        #         destination.write(chunk)
+        #         destination.close()
+
         result = {
             "success": True
         }

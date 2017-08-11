@@ -57,7 +57,7 @@ class ReportViewSet(mixins.CreateModelMixin,
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
-            queryset = queryset.filter(updated_at__gt=lasttime)
+            queryset = queryset.filter(updatedAt__gt=lasttime)
         elif unitId is not None:
             try:
                 unit = unit_queryset.get(id=unitId)

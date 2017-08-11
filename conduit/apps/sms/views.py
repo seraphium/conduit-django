@@ -167,7 +167,7 @@ class CommandViewSet(mixins.CreateModelMixin,
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
-            queryset = queryset.filter(updated_at__gt=lasttime)
+            queryset = queryset.filter(updatedAt__gt=lasttime)
 
         return queryset
 

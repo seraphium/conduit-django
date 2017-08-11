@@ -10,6 +10,7 @@ from .renderers import SmsJSONRenderer, CommandJSONRenderer
 from datetime import datetime
 from django.db.models import Q
 
+from conduit.apps.webservices.sms import sms_send
 
 class SmsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -35,6 +36,13 @@ class SmsViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        #call sms send
+        content = serializer_data.get('content', None)
+        receiver = serializer_data.get('receiver', None)
+        direction = serializer_data.get('direction', None)
+        if content is not None and receiver is not None and direction == 0:
+            sms_send(content, receiver='1064854249867')
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

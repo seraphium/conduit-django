@@ -148,7 +148,7 @@ class ImageUploadView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     parser_classes = (FileUploadParser,)
 
-    reportMediaBindingThresholdMin = 1000
+    reportMediaBindingThresholdMin = 100000
 
     def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
 

@@ -10,7 +10,7 @@ from .renderers import SmsJSONRenderer, CommandJSONRenderer
 from datetime import datetime
 from django.db.models import Q
 
-from conduit.apps.webservices.sms import sms_send
+from conduit.apps.webservices.sms import sms_send_normal, sms_send_iot
 
 class SmsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -37,12 +37,15 @@ class SmsViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        #call sms send
+        #call sms send to normal cell number(not IoT)
         content = serializer_data.get('content', None)
         receiver = serializer_data.get('receiver', None)
         direction = serializer_data.get('direction', None)
         if content is not None and receiver is not None and direction == 0:
-            sms_send(content, receiver='1064854249867')
+            if len(receiver) == 11:
+                sms_send_normal(content, receiver)
+            else:
+                sms_send_iot(content, receiver)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

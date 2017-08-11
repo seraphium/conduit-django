@@ -1,6 +1,5 @@
 import oss2
 from rest_framework.exceptions import ValidationError
-from .sms import sms_send
 
 accessKeyId = "LTAIxuJzCN49WyOx"
 accessKeySecret = "YzU2GrECDsYFlePmGeqHAhFYejW5Q8 "

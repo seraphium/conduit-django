@@ -38,8 +38,8 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin, TimestampModel):
 
     name = models.CharField(db_index=True, max_length=255, unique=True)
-    dept = models.CharField(db_index=True, max_length=255, blank=True)
-    line = models.CharField(db_index=True, max_length=255, blank=True)
+    dept = models.CharField(db_index=True, max_length=255, blank=True, null=True)
+    line = models.CharField(db_index=True, max_length=255, blank=True, null=True)
     phonenum = models.CharField(db_index=True, max_length=32, unique=True)
     permissions = ((0, 'admin'), (1, 'operator'))
     permission = models.SmallIntegerField(choices=permissions)

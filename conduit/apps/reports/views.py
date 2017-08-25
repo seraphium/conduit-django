@@ -156,7 +156,7 @@ class ImageUploadView(generics.CreateAPIView):
 
         #update report
         time_low = datetime.now() - timedelta(minutes=self.reportMediaBindingThresholdMin)
-        report = Report.objects.filter(Q(unit__identity=imei), Q(infoId=statusid - 1), Q(time__gt=time_low)).first()
+        report = Report.objects.filter(Q(unit__identity=imei), Q(infoId=int(statusid) - 1), Q(time__gt=time_low)).first()
         if report is None:
             raise NotFound('Report with this status id does not exists')
         if cameraid == '1':

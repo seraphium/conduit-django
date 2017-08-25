@@ -9,7 +9,7 @@ router.register(r'units', UnitsViewSet)
 urlpatterns = [
     url(r'^units/delete/?$', UnitDeleteAPIView.as_view()),
     url(r'^units/(?P<unit_id>[\d]+)/?$', UnitUpdateAPIView.as_view()),
-    url(r'^unitsetting/?$', UnitSettingAPIView.as_view()),
+    url(r'^unitSetting/?$', UnitSettingAPIView.as_view()),
 
     url(r'^', include(router.urls)),
 

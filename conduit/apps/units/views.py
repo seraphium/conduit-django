@@ -142,11 +142,12 @@ class UnitSettingAPIView(generics.RetrieveAPIView):
             unit = Unit.objects.get(identity=unit_imei)
         except Unit.DoesNotExist:
             raise NotFound('Unit with this imei does not exists.')
-
-        response = {'settings': {
-            'alarmSettings': model_to_dict(unit.alarmSettings),
-            'cameraSettings': model_to_dict(unit.cameraSettings),
-            'networkSettings': model_to_dict(unit.networkSettings)
-        }}
-
+        try:
+            response = {'settings': {
+                'alarmSettings': model_to_dict(unit.alarmSettings),
+                'cameraSettings': model_to_dict(unit.cameraSettings),
+                'networkSettings': model_to_dict(unit.networkSettings)
+            }}
+        except Exception as e:
+            raise NotFound(str(e))
         return Response(response,  status=status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets, views
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
@@ -156,9 +156,9 @@ class ImageUploadView(generics.CreateAPIView):
 
         #update report
         time_low = datetime.now() - timedelta(minutes=self.reportMediaBindingThresholdMin)
-        report = Report.objects.filter(Q(unit__identity=imei), Q(infoId=statusid), Q(time__gt=time_low)).first()
+        report = Report.objects.filter(Q(unit__identity=imei), Q(infoId=statusid - 1), Q(time__gt=time_low)).first()
         if report is None:
-            raise Report.DoesNotExist
+            raise NotFound('Report with this status id does not exists')
         if cameraid == '1':
             report.mediaTypeCamera1 = mode
         if cameraid == '2':
@@ -173,15 +173,19 @@ class ImageUploadView(generics.CreateAPIView):
 
         file_obj = request.data['file']
 
-        upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
 
         # #picture handling logic
-        # saving_path = '/tmp/'
-        # full_path = os.path.join(saving_path, file_obj.name)
-        # with open(full_path, 'wb+') as destination:
-        #     for chunk in file_obj.chunks():
-        #         destination.write(chunk)
-        #         destination.close()
+        try:
+            upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
+
+            # saving_path = '/tmp/'
+            # full_path = os.path.join(saving_path, file_obj.name)
+            # with open(full_path, 'wb+') as destination:
+            #     for chunk in file_obj.chunks():
+            #         destination.write(chunk)
+            #         destination.close()
+        except Exception as e:
+            raise ValidationError("picture upload failed:" + str(e))
 
         result = {
             "success": True

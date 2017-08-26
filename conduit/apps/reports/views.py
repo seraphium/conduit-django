@@ -171,11 +171,10 @@ class ImageUploadView(generics.CreateAPIView):
 
         report.save()
 
-        file_obj = request.data['file']
-
-
         # #picture handling logic
         try:
+            file_obj = request.data['file']
+
             upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
 
             # saving_path = '/tmp/'

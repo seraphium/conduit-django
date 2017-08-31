@@ -184,9 +184,14 @@ class ImageUploadView(generics.CreateAPIView):
             #         destination.write(chunk)
             #         destination.close()
         except Exception as e:
+            print ("picture upload failed:" + str(e))
             raise ValidationError("picture upload failed:" + str(e))
-
         result = {
-            "success": True
+            "success": True,
+            "imei": imei,
+            "statusid": statusid,
+            "mode": mode,
+            "cameraid" : cameraid,
+            "frameid": frameid
         }
         return Response(result, status=status.HTTP_200_OK)

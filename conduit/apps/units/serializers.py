@@ -42,7 +42,7 @@ class UnitCameraSettingsSerializer(serializers.ModelSerializer):
             "camResolution1",
             "camFrameRate1",
             "camVideoTimeLen1",
-            "camTimingIntv11",
+            "camTimingIntvl1",
 
             "camEnable2",
             "camLgtEnhance2",
@@ -50,7 +50,7 @@ class UnitCameraSettingsSerializer(serializers.ModelSerializer):
             "camResolution2",
             "camFrameRate2",
             "camVideoTimeLen2",
-            "camTimingIntv12",
+            "camTimingIntvl2",
 
             "camEnable3",
             "camLgtEnhance3",
@@ -58,7 +58,7 @@ class UnitCameraSettingsSerializer(serializers.ModelSerializer):
             "camResolution3",
             "camFrameRate3",
             "camVideoTimeLen3",
-            "camTimingIntv13"
+            "camTimingIntvl3"
 
         )
 
@@ -172,6 +172,9 @@ class UnitSerializer(serializers.ModelSerializer):
             'backPhoneUsed',
             'sn',
             'location',
+            'province',
+            'city',
+            'district',
             'towerFrom',
             'towerTo',
             'idInTower',

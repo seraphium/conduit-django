@@ -35,6 +35,13 @@ class ReportSerializer(serializers.ModelSerializer):
                 raise NotFound("unit with imei not found")
         if unit is None:
             raise NotFound('unit with id/imei not found')
+        hardVer = validated_data.get('hardwareVer', None)
+        if hardVer is not None:
+            unit.hardwareVersion = hardVer
+        protocolVer = validated_data.get('firmwareVer', None)
+        if protocolVer is not None:
+            unit.protocolVersion = protocolVer
+        unit.save()
         ackOperatorId = self.context.get('ackOperatorId', None)
         ackop = None
         if ackOperatorId is not None:

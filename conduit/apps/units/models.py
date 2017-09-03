@@ -62,7 +62,7 @@ class UnitCameraSettings(TimestampModel):
     camResolution1 = models.SmallIntegerField()
     camFrameRate1 = models.SmallIntegerField()
     camVideoTimeLen1 = models.SmallIntegerField()
-    camTimingIntv11 = models.SmallIntegerField()
+    camTimingIntvl1 = models.SmallIntegerField()
 
     camEnable2 = models.BooleanField(default=True)
     camLgtEnhance2 = models.BooleanField(default=True)
@@ -70,7 +70,7 @@ class UnitCameraSettings(TimestampModel):
     camResolution2 = models.SmallIntegerField()
     camFrameRate2 = models.SmallIntegerField()
     camVideoTimeLen2 = models.SmallIntegerField()
-    camTimingIntv12 = models.SmallIntegerField()
+    camTimingIntvl2 = models.SmallIntegerField()
 
     camEnable3 = models.BooleanField(default=True)
     camLgtEnhance3 = models.BooleanField(default=True)
@@ -78,4 +78,4 @@ class UnitCameraSettings(TimestampModel):
     camResolution3 = models.SmallIntegerField()
     camFrameRate3 = models.SmallIntegerField()
     camVideoTimeLen3 = models.SmallIntegerField()
-    camTimingIntv13 = models.SmallIntegerField()
+    camTimingIntvl3 = models.SmallIntegerField()

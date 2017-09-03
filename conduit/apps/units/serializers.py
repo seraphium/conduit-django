@@ -191,6 +191,8 @@ class UnitSerializer(serializers.ModelSerializer):
             'alarmSettings',
             'networkSettings',
             'cameraSettings',
+            'hardwareVersion',
+            'protocolVersion',
             'updatedAt'
         )
         read_only_fields = ('owner', 'updatedAt')

@@ -77,6 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'conduit.wsgi.application'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024000
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -127,7 +128,7 @@ AUTH_USER_MODEL = 'authentication.User'
 
 REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%Y-%m-%d-%H:%M:%S',
-    'DATETIME_INPUT_FORMATS':  '%Y-%m-%d-%H:%M:%S',
+    'DATETIME_INPUT_FORMATS':  ['%Y-%m-%d-%H:%M:%S'],
     'EXCEPTION_HANDLER': 'conduit.apps.core.exceptions.core_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -135,6 +136,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'conduit.apps.authentication.backends.JWTAuthentication',
     ),
+    'FILE_UPLOAD_HANDLERS': [
+        'django.core.files.uploadhandler.MemoryFileUploadHandler'
+    ]
 }
 
 

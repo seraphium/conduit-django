@@ -151,7 +151,7 @@ class ImageUploadView(generics.CreateAPIView):
     reportMediaBindingThresholdMin = 100000
 
     def post(self, request, imei, statusid, mode, cameraid, frameid, format='jpg'):
-
+        print(datetime.now(),' received pic upload request from ', imei)
         report = None
 
         #update report
@@ -173,7 +173,9 @@ class ImageUploadView(generics.CreateAPIView):
 
         # #picture handling logic
         try:
-            file_obj = request.data['file']
+            print(datetime.now(), ' getting pic data from', imei)
+            file_obj = request.FILES['file']
+            print(datetime.now(), ' finished getting pic data from ', imei, " and start upload")
 
             upload_to_oss(file_obj, report.mediaGuid, cameraid, frameid)
 

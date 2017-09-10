@@ -49,16 +49,21 @@ class ReportViewSet(mixins.CreateModelMixin,
             queryset = queryset.filter(ownerQ | operatorQ)
 
         lasttime_string = self.request.query_params.get('lasttime', None)
+        reportId_string = self.request.query_params.get('reportId', None)
 
         id = self.request.query_params.get('id', None)
         unitId = self.request.query_params.get('unitId', None)
-
+        limitId_string = self.request.query_params.get('limitId', None)
         if id is not None:
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
-            queryset = queryset.filter(updatedAt__gt=lasttime)
-        elif unitId is not None:
+            queryset = queryset.filter(time__gt=lasttime)
+        elif reportId_string is not None:
+            queryset = queryset.filter(id__gt=int(reportId_string))
+            queryset = queryset.order_by('id')
+
+        if unitId is not None:
             try:
                 unit = unit_queryset.get(id=unitId)
             except Unit.DoesNotExist:

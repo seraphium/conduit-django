@@ -60,8 +60,12 @@ class ReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(time__gt=lasttime)
         elif reportId_string is not None:
-            queryset = queryset.filter(id__lt=int(reportId_string))
-            queryset = queryset.order_by('-id')
+            if unitId is not None:
+                queryset = queryset.filter(id__lt=int(reportId_string))
+                queryset = queryset.order_by('-id')
+            else:
+                queryset = queryset.filter(id__gt=int(reportId_string))
+                queryset = queryset.order_by('id')
 
         ##filter that only report with mediaid or no mediaId and over 5 min
         hasMediaQ = Q(hasMedia=True)

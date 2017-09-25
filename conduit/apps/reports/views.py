@@ -53,8 +53,22 @@ class ReportViewSet(mixins.CreateModelMixin,
 
         id = self.request.query_params.get('id', None)
         unitId = self.request.query_params.get('unitId', None)
-        limitId_string = self.request.query_params.get('limitId', None)
-        if id is not None:
+        latest = self.request.query_params.get('latest', None)
+
+        if latest is not None:
+            unit_queryset = Unit.objects.all().filter(type=2)
+            reportIdList = []
+            ownerQ = Q(owner=self.request.user)
+            operatorQ = Q(operators__id__contains=self.request.user.id)
+            unit_queryset = unit_queryset.filter(ownerQ | operatorQ)
+            for unit in unit_queryset:
+                reportIds = queryset.filter(unit__id=unit.id)
+                first = reportIds.first()
+                if first is not None:
+                    reportIdList.append(first.id)
+
+            queryset = queryset.filter(id__in=reportIdList)
+        elif id is not None:
             queryset = queryset.filter(id=id)
         elif lasttime_string is not None:
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
@@ -66,6 +80,7 @@ class ReportViewSet(mixins.CreateModelMixin,
             else:
                 queryset = queryset.filter(id__gt=int(reportId_string))
                 queryset = queryset.order_by('id')
+
 
         ##filter that only report with mediaid or no mediaId and over 5 min
         hasMediaQ = Q(hasMedia=True)

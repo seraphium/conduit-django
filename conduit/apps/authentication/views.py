@@ -5,9 +5,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import RegistrationSerializer, LoginSerializer, UserSerializer, UserUpdateSerializer
+from rest_framework.exceptions import NotFound, ValidationError
 
 from .renderers import UserJSONRenderer
-
+from .models import User
 
 class RegistrationAPIView(APIView):
     permission_classes = (AllowAny,)
@@ -36,16 +37,40 @@ class LoginAPIView(APIView):
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UserSerializer
     update_serializer_class = UserUpdateSerializer
 
+    queryset = User.objects.all()
+
     def retrieve(self, request, *args, **kwargs):
-        serializer = self.serializer_class(request.user)
+        serializer_context = {'request': request}
+        username = request.query_params.get('username', None)
+        phonenum = request.query_params.get('phonenum', None)
+        if username is not None:
+            try:
+                self.queryset = self.queryset.get(name=username)
+            except User.DoesNotExist:
+                raise NotFound('An user with this username does not exists.')
+        elif phonenum is not None:
+            try:
+                self.queryset = self.queryset.get(phonenum=phonenum)
+            except User.DoesNotExist:
+                raise NotFound('An user with this phonenum does not exists.')
+        else:
+            self.queryset = self.queryset.get(id=request.user.id)
+        try:
+            serializer_instance = self.queryset
+        except User.DoesNotExist:
+            raise NotFound('An user with this phonenum/name does not exists.')
+
+        serializer = self.serializer_class(serializer_instance,
+                                           context=serializer_context)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         serializer_data = request.data.get('user', {})
         updating_user_name = serializer_data.get('name', None)

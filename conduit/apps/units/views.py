@@ -91,6 +91,10 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Unit.objects.all()
     serializer_class = UnitSerializer
+    renderer_classes = (UnitJSONRenderer,
+                        UnitAlarmSettingsJSONRenderer,
+                        UnitNetworkSettingsJSONRenderer,
+                        UnitCameraSettingsJSONRenderer)
 
     def post(self, request, unit_id=None):
 

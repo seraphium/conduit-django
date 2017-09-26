@@ -63,7 +63,7 @@ class ReportViewSet(mixins.CreateModelMixin,
             unit_queryset = unit_queryset.filter(ownerQ | operatorQ)
             for unit in unit_queryset:
                 reportIds = queryset.filter(unit__id=unit.id)
-                first = reportIds.first()
+                first = reportIds.order_by('-time').first()
                 if first is not None:
                     reportIdList.append(first.id)
 

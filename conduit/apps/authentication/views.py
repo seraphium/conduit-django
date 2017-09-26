@@ -58,8 +58,10 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
                 self.queryset = self.queryset.get(phonenum=phonenum)
             except User.DoesNotExist:
                 raise NotFound('An user with this phonenum does not exists.')
-        else:
+        elif request.user.id is not None:
             self.queryset = self.queryset.get(id=request.user.id)
+        else:
+            raise NotFound('query with not logged user without name/phonenum is not allowed')
         try:
             serializer_instance = self.queryset
         except User.DoesNotExist:

@@ -34,15 +34,15 @@ class UnitsViewSet(mixins.CreateModelMixin,
         if existsSn is not None:
             exists = Unit.objects.filter(sn=existsSn)
             if exists:
-                raise ValidationError('unit with exists serial number, phonenum=' + exists[0].phoneNum)
+                raise ValidationError('unit with exists serial number, owner=' + exists[0].owner.phonenum)
         if existsPhonenum is not None:
             exists = Unit.objects.filter(phoneNum=existsPhonenum)
             if exists:
-                raise ValidationError('unit with exists phoneNum, phonenum=' + exists[0].phoneNum)
+                raise ValidationError('unit with exists phoneNum, owner=' + exists[0].owner.phonenum)
         if existsImei is not None:
             exists = Unit.objects.filter(identity=existsImei)
             if exists:
-                raise ValidationError('unit with exists imei, phonenum=' + exists[0].phoneNum)
+                raise ValidationError('unit with exists imei, owner=' + exists[0].owner.phonenum)
         serializer_context = {
             'owner': request.user,
             'parent': serializer_data.get('parent', None),

@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -28,7 +28,21 @@ class UnitsViewSet(mixins.CreateModelMixin,
     def create(self, request):
 
         serializer_data = request.data.get('unit', {})
-
+        existsSn = serializer_data.get('sn', None)
+        existsPhonenum = serializer_data.get('phoneNum', None)
+        existsImei = serializer_data.get('identity', None)
+        if existsSn is not None:
+            exists = Unit.objects.filter(sn=existsSn)
+            if exists:
+                raise ValidationError('unit with exists serial number, phonenum=' + exists[0].phoneNum)
+        if existsPhonenum is not None:
+            exists = Unit.objects.filter(phoneNum=existsPhonenum)
+            if exists:
+                raise ValidationError('unit with exists phoneNum, phonenum=' + exists[0].phoneNum)
+        if existsImei is not None:
+            exists = Unit.objects.filter(identity=existsImei)
+            if exists:
+                raise ValidationError('unit with exists imei, phonenum=' + exists[0].phoneNum)
         serializer_context = {
             'owner': request.user,
             'parent': serializer_data.get('parent', None),

@@ -123,9 +123,9 @@ class UserSerializer(serializers.ModelSerializer):
     )
     ownedunits = UnitSerializer(many=True)
     children = ChildrenSerializer(many=True)
-
+    units = UnitSerializer(many=True)
     class Meta:
         model = User
         fields = ('id', 'name', 'password', 'token', 'phonenum', 'dept', 'line',
-                  'ownedunits', 'children')
+                  'ownedunits', 'units', 'children')
         read_only_fields = ('id', 'token',)

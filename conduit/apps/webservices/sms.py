@@ -1,6 +1,7 @@
 from rest_framework.exceptions import ValidationError
 import http, json
 from urllib import request, parse, error
+from conduit.apps.units.models import Unit
 
 yunpianApiKey = "257b42a0e9a6d2f58fc9dcb176fa24da"
 urlSendSmsYunpian = "https://sms.yunpian.com/v2/sms/single_send.json"

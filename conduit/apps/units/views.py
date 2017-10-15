@@ -9,6 +9,23 @@ from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetw
 from datetime import datetime
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from conduit.apps.core.utils import calcChecksum
+from conduit.apps.webservices.sms import sms_send_iot
+
+# send basic config sms ##HS to sphere while creating or updating unit
+def sendLatestConfig(unit):
+    contentString = "##HS#LA{0}B{1}C{2}#M{3}#I{4}#P{5}"
+    distanceA= str(unit['alarmSettings']['almDistSet1']).zfill(4)
+    distanceB= str(unit['alarmSettings']['almDistSet2']).zfill(4)
+    distanceC= str(unit['alarmSettings']['almDistSet3']).zfill(4)
+    cameraMode = str(unit['cameraSettings']['camMode1'])
+    ipAdd = str(unit['networkSettings']['serverIp'])
+    port = str(unit['networkSettings']['serverPort'])
+    contentString = contentString.format(distanceA, distanceB, distanceC, cameraMode, ipAdd, port)
+    checksum = calcChecksum(contentString)
+    contentString += checksum
+    sms_send_iot(unit.phoneNum, contentString)
+
 
 class UnitsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -52,6 +69,8 @@ class UnitsViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        sendLatestConfig(serializer_data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -127,6 +146,7 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
                                             partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        sendLatestConfig(unit=serializer.data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -24,7 +24,7 @@ def sendLatestConfig(unit):
     contentString = contentString.format(distanceA, distanceB, distanceC, cameraMode, ipAdd, port)
     checksum = calcChecksum(contentString)
     contentString += checksum
-    sms_send_iot(unit.phoneNum, contentString)
+    sms_send_iot(content=contentString, receiver=unit['phoneNum'])
 
 
 class UnitsViewSet(mixins.CreateModelMixin,

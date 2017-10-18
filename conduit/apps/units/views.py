@@ -1,16 +1,19 @@
-from rest_framework import generics, mixins, status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
-from rest_framework.response import Response
-
-from .models import Unit
-from .serializers import UnitSerializer
-from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer, UnitCameraSettingsJSONRenderer
 from datetime import datetime
+
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from rest_framework import generics, mixins, status, viewsets
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+
 from conduit.apps.core.utils import calcChecksum
 from conduit.apps.webservices.sms import sms_send_iot
+from .models import Unit
+from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer, \
+    UnitCameraSettingsJSONRenderer
+from .serializers import UnitSerializer
+
 
 # send basic config sms ##HS to sphere while creating or updating unit
 def sendLatestConfig(unit):
@@ -48,15 +51,15 @@ class UnitsViewSet(mixins.CreateModelMixin,
         existsSn = serializer_data.get('sn', None)
         existsPhonenum = serializer_data.get('phoneNum', None)
         existsImei = serializer_data.get('identity', None)
-        if existsSn is not None:
+        if existsSn is not None and existsSn != '':
             exists = Unit.objects.filter(sn=existsSn)
             if exists:
                 raise ValidationError('unit with exists serial number, owner=' + exists[0].owner.phonenum)
-        if existsPhonenum is not None:
+        if existsPhonenum is not None and existsPhonenum != '':
             exists = Unit.objects.filter(phoneNum=existsPhonenum)
             if exists:
                 raise ValidationError('unit with exists phoneNum, owner=' + exists[0].owner.phonenum)
-        if existsImei is not None:
+        if existsImei is not None and existsImei != '':
             exists = Unit.objects.filter(identity=existsImei)
             if exists:
                 raise ValidationError('unit with exists imei, owner=' + exists[0].owner.phonenum)
@@ -69,8 +72,8 @@ class UnitsViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        sendLatestConfig(serializer_data)
+        if serializer_data.get('type', None) == 2:
+            sendLatestConfig(serializer_data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -146,7 +149,8 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
                                             partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        sendLatestConfig(unit=serializer.data)
+        if serializer_data.get('type', None) == 2:
+            sendLatestConfig(unit=serializer.data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

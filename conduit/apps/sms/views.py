@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -46,7 +46,9 @@ class SmsViewSet(mixins.CreateModelMixin,
             if len(receiver) == 11:
                 sms_send_normal(content, receiver)
             else:
-                sms_send_iot(content, receiver)
+                res = sms_send_iot(content, receiver)
+                if res != "":
+                    raise ValidationError(res)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -51,14 +51,15 @@ class ReportSerializer(serializers.ModelSerializer):
                 raise NotFound("user with id not found")
 
         report = Report.objects.create(unit=unit, ackOperator=ackop, **validated_data)
-        alarm1 = report.usDistMsr1 < report.usDistAlmSet1 and report.usDistMsr1 > 80
-        alarm2 = report.usDistMsr2 < report.usDistAlmSet2 and report.usDistMsr2 > 80
-        alarm3 = report.usDistMsr3 < report.usDistAlmSet3 and report.usDistMsr3 > 80
-
-        if alarm1 or alarm2 or alarm3:
-            report.isAlert = True
-
-        report.save()
+        ''' alarm1 = report.usDistMsr1 < report.usDistAlmSet1 and report.usDistMsr1 > 80
+         alarm2 = report.usDistMsr2 < report.usDistAlmSet2 and report.usDistMsr2 > 80
+         alarm3 = report.usDistMsr3 < report.usDistAlmSet3 and report.usDistMsr3 > 80
+        
+         if alarm1 or alarm2 or alarm3:
+             report.isAlert = True
+        
+         report.save()
+         '''
         return report
 
     def update(self, instance, validated_data):

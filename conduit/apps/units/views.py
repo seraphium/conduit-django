@@ -51,6 +51,8 @@ class UnitsViewSet(mixins.CreateModelMixin,
         existsSn = serializer_data.get('sn', None)
         existsPhonenum = serializer_data.get('phoneNum', None)
         existsImei = serializer_data.get('identity', None)
+        operators = serializer_data.get('operators', None)
+
         if existsSn is not None and existsSn != '':
             exists = Unit.objects.filter(sn=existsSn)
             if exists:
@@ -63,11 +65,13 @@ class UnitsViewSet(mixins.CreateModelMixin,
             exists = Unit.objects.filter(identity=existsImei)
             if exists:
                 raise ValidationError('unit with exists imei, owner=' + exists[0].owner.phonenum)
+        if operators is None or len(operators) == 0:
+            raise ValidationError('unit with no operators')
         serializer_context = {
             'owner': request.user,
             'parent': serializer_data.get('parent', None),
             'request': request,
-            'operators': serializer_data['operators']
+            'operators': operators
         }
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

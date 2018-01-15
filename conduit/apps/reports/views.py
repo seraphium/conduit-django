@@ -41,19 +41,22 @@ class ReportViewSet(mixins.CreateModelMixin,
         return Response({"reports": serializer.data}, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        queryset = self.queryset
-        unit_queryset = Unit.objects.all()
-        if self.request.user.is_superuser is not True:
-            ownerQ = Q(unit__owner=self.request.user)
-            operatorQ = Q(unit__operators__id__contains=self.request.user.id)
-            queryset = queryset.filter(ownerQ | operatorQ)
-
         lasttime_string = self.request.query_params.get('lasttime', None)
         reportId_string = self.request.query_params.get('reportId', None)
 
         id = self.request.query_params.get('id', None)
         unitId = self.request.query_params.get('unitId', None)
         latest = self.request.query_params.get('latest', None)
+        greater = self.request.query_params.get('greater', None)
+        isAlert = self.request.query_params.get('isAlert', None)
+        queryset = self.queryset
+        unit_queryset = Unit.objects.all()
+        if isAlert is not None:
+            queryset = queryset.filter(isAlert=True)
+        if self.request.user.is_superuser is not True:
+            ownerQ = Q(unit__owner=self.request.user)
+            operatorQ = Q(unit__operators__id__contains=self.request.user.id)
+            queryset = queryset.filter(ownerQ | operatorQ)
 
         if latest is not None:
             unit_queryset = Unit.objects.all().filter(type=2)
@@ -75,19 +78,19 @@ class ReportViewSet(mixins.CreateModelMixin,
             lasttime = datetime.strptime(lasttime_string, '%Y-%m-%d-%H:%M:%S')
             queryset = queryset.filter(time__gt=lasttime)
         elif reportId_string is not None:
-            if unitId is not None:
-                queryset = queryset.filter(id__lt=int(reportId_string))
-                queryset = queryset.order_by('-id')
-            else:
+            if greater is not None:
                 queryset = queryset.filter(id__gt=int(reportId_string))
                 queryset = queryset.order_by('id')
-
+            else:
+                queryset = queryset.filter(id__lt=int(reportId_string))
+                queryset = queryset.order_by('-id')
 
         ##filter that only report with mediaid or no mediaId and over 5 min
         hasMediaQ = Q(hasMedia=True)
         currentTimeMinutes5min = datetime.now() - timedelta(minutes=5)
         mediaTimeOutQ = Q(hasMedia=False) & Q(time__lt=currentTimeMinutes5min)
         queryset = queryset.filter(hasMediaQ | mediaTimeOutQ)
+
         if unitId is not None:
             try:
                 unit = unit_queryset.get(id=unitId)

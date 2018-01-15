@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins, status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -9,8 +9,9 @@ from .renderers import SmsJSONRenderer, CommandJSONRenderer
 
 from datetime import datetime
 from django.db.models import Q
-
+from conduit.apps.units.models import Unit
 from conduit.apps.webservices.sms import sms_send_normal, sms_send_iot
+from conduit.apps.core.utils import calcChecksum
 
 class SmsViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
@@ -45,7 +46,9 @@ class SmsViewSet(mixins.CreateModelMixin,
             if len(receiver) == 11:
                 sms_send_normal(content, receiver)
             else:
-                sms_send_iot(content, receiver)
+                res = sms_send_iot(content, receiver)
+                if res != "":
+                    raise ValidationError(res)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -138,6 +141,25 @@ class CommandViewSet(mixins.CreateModelMixin,
 
     renderer_classes = (CommandJSONRenderer, )
 
+    def handlingCommand(self, command):
+        type = command["type"]
+        try:
+            unit = Unit.objects.get(id=command["unitId"])
+        except Unit.DoesNotExist:
+            raise NotFound("unit with id not found")
+
+        if type == 0:
+            cmd = "##HL"
+            sms_send_iot(cmd + calcChecksum(cmd), unit.phoneNum)
+        elif type == 1:
+            cmd = "##HA"
+            sms_send_iot(cmd + calcChecksum(cmd), unit.phoneNum)
+        elif type == 2:
+            cameraId = str(command["parameter"])
+            content = "##HV#C{0}".format(cameraId)
+            content += calcChecksum(content)
+            sms_send_iot(content, unit.phoneNum)
+
     def create(self, request):
 
         serializer_data = request.data
@@ -150,6 +172,8 @@ class CommandViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        self.handlingCommand(serializer.data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

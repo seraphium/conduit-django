@@ -73,15 +73,22 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
+        userId = self.request.query_params.get('id', None)
 
         serializer_data = request.data.get('user', {})
         updating_user_name = serializer_data.get('name', None)
 
-        if updating_user_name != request.user.name :
-            return Response({'error': 'cannot update other user'}, status=status.HTTP_403_FORBIDDEN)
+        #if updating_user_name != request.user.name :
+        #    return Response({'error': 'cannot update other user'}, status=status.HTTP_403_FORBIDDEN)
 
+        try:
+            serializer_instance = self.queryset.get(id=userId)
+        except User.DoesNotExist:
+            raise NotFound("user with id not found")
         serializer = self.update_serializer_class(
-            request.user, data=serializer_data, partial=True
+            serializer_instance,
+            data=serializer_data,
+            partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()

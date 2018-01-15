@@ -61,6 +61,7 @@ class ReportViewSet(mixins.CreateModelMixin,
             ownerQ = Q(owner=self.request.user)
             operatorQ = Q(operators__id__contains=self.request.user.id)
             unit_queryset = unit_queryset.filter(ownerQ | operatorQ)
+            queryset = queryset.filter(isAlert=False)
             for unit in unit_queryset:
                 reportIds = queryset.filter(unit__id=unit.id)
                 first = reportIds.order_by('-time').first()

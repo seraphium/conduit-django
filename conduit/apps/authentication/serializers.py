@@ -37,10 +37,10 @@ class LoginSerializer(serializers.Serializer):
             try:
                 user = User.objects.get(phonenum=name)
             except User.DoesNotExist:
-                raise NotFound("user with name/phonenum not found")
+                raise NotFound("user with name like phonenum was not found")
             user = authenticate(username=user.name, password=password)
             if user is None:
-                raise serializers.ValidationError('A user with this name and password was not found')
+                raise serializers.ValidationError('user authentication failed')
 
         if not user.is_active:
             raise serializers.ValidationError(

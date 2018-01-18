@@ -42,6 +42,9 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         queryset = self.queryset
+        isAlert = self.request.query_params.get('isAlert', None)
+        if isAlert is not None:
+            queryset = queryset.filter(isAlert=True)
         unit_queryset = Unit.objects.all()
         if self.request.user.is_superuser is not True:
             ownerQ = Q(unit__owner=self.request.user)
@@ -50,10 +53,10 @@ class ReportViewSet(mixins.CreateModelMixin,
 
         lasttime_string = self.request.query_params.get('lasttime', None)
         reportId_string = self.request.query_params.get('reportId', None)
-
         id = self.request.query_params.get('id', None)
         unitId = self.request.query_params.get('unitId', None)
         latest = self.request.query_params.get('latest', None)
+
 
         if latest is not None:
             unit_queryset = Unit.objects.all().filter(type=2)
@@ -100,6 +103,7 @@ class ReportViewSet(mixins.CreateModelMixin,
             elif unit.type == 0:    #city
                 unit_selected = unit_queryset.filter(parent__parent=unit)
             queryset = queryset.filter(unit__in=unit_selected)
+
         return queryset
 
     def list(self, request):

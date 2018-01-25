@@ -21,9 +21,16 @@ def sendLatestConfig(unit):
     distanceA= str(unit['alarmSettings']['almDistSet1']).zfill(4)
     distanceB= str(unit['alarmSettings']['almDistSet2']).zfill(4)
     distanceC= str(unit['alarmSettings']['almDistSet3']).zfill(4)
-    cameraMode = str(unit['cameraSettings']['camMode1'])
     ipAdd = str(unit['networkSettings']['serverIp'])
     port = str(unit['networkSettings']['serverPort'])
+    cameraMode = 0
+    if unit['alarmSettings']['sensMode'] == 1:
+        cameraMode = cameraMode | 4
+    if unit['alarmSettings']['beepEnable'] == 1:
+        cameraMode = cameraMode | 2
+    if unit['alarmSettings']['weatherMask'] == 1:
+        cameraMode = cameraMode | 1
+
     contentString = contentString.format(distanceA, distanceB, distanceC, cameraMode, ipAdd, port)
     checksum = calcChecksum(contentString)
     contentString += checksum
@@ -154,9 +161,9 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         if serializer_data.get('type', None) == 2:
-            sendLatestConfig(unit=serializer.data)
+            sendLatestConfig(unit=serializer.validated_data)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class UnitDeleteAPIView(generics.DestroyAPIView):

@@ -155,7 +155,6 @@ class UnitSerializer(serializers.ModelSerializer):
             instance.networkSettings.save()
         if hasattr(instance, 'cameraSettings'):
             instance.cameraSettings.save()
-        instance.save()
         return instance
 
     class Meta:

@@ -29,7 +29,7 @@ class ReportViewSet(mixins.CreateModelMixin,
     def create(self, request):
 
         serializer_data = request.data.get('report', {})
-
+        print("received report:", serializer_data)
         serializer_context = {
             'request': request,
             'unitId': serializer_data.get('unitId', None),

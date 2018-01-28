@@ -30,6 +30,7 @@ def sendLatestConfig(unit):
         cameraMode = cameraMode | 2
     if unit['alarmSettings']['weatherMask'] == 1:
         cameraMode = cameraMode | 1
+    cameraMode = str(cameraMode).zfill(3)
 
     contentString = contentString.format(distanceA, distanceB, distanceC, cameraMode, ipAdd, port)
     checksum = calcChecksum(contentString)

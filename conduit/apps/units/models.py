@@ -49,7 +49,7 @@ class UnitAlarmSettings(TimestampModel):
 class UnitNetworkSettings(TimestampModel):
     unit = models.OneToOneField("units.Unit",related_name="networkSettings", on_delete=models.CASCADE)
     serverIp = models.CharField(max_length=32, default="121.41.25.64")
-    serverPort = models.IntegerField(default='8682')
+    serverPort = models.IntegerField(default='7000')
     gsmApn = models.CharField(max_length=32, blank=True)
     gsmUserName = models.CharField(max_length=32, blank=True)
     gsmPassword = models.CharField(max_length=32, blank=True)

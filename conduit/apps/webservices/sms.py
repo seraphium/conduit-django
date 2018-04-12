@@ -9,6 +9,9 @@ urlSendSmsIoT = 'http://120.26.213.169/api/sms/'
 urlGetAuthIoT = "http://120.26.213.169/api/access_token/"
 IoTToken = ""
 
+urlGetWeatherCodeTemplate = "http://restapi.amap.com/v3/config/district?key=b16dc715445f887cd759850793a5b163&keywords={0}&subdistrict=0&showbiz=false&extensions=base"
+urlGetWeatherTemplate = "http://restapi.amap.com/v3/weather/weatherInfo?key=b16dc715445f887cd759850793a5b163&city={0}"
+
 def sms_send_normal(content, receiver):
     dataSendSms = "apikey=" + yunpianApiKey + "&mobile=" + receiver + "&text=" + content
     data = dataSendSms.encode('utf-8')
@@ -64,3 +67,32 @@ def sms_send_iot(content, receiver):
         msg = e.read().decode('utf-8')
         print("sms_send error:", msg)
         return resp['msg']
+
+def unitGetWeather(unit):
+    code = 0
+    urlGetWeatherCode = urlGetWeatherCodeTemplate.format(parse.quote(unit['city']))
+    headers = {
+        'User-Agent': r'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    req = request.Request(urlGetWeatherCode, headers=headers)
+    try:
+        resp = request.urlopen(req).read().decode('utf-8')
+        resp = json.loads(resp)
+        code = resp['districts'][0]['adcode']
+    except error as e:
+        msg = e.read().decode('utf-8')
+        print("unit get weather code error:", msg)
+    urlGetWeather = urlGetWeatherTemplate.format(code)
+    req = request.Request(urlGetWeather, headers=headers)
+    try:
+        resp = request.urlopen(req).read().decode('utf-8')
+        resp = json.loads(resp)
+        weather = resp["lives"][0]["weather"]
+        print(weather)
+    except error as e:
+        msg = e.read().decode('utf-8')
+        print("unit get weather error:", msg)
+
+
+    return weather

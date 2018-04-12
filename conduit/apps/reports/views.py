@@ -3,12 +3,15 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
-
+from django.forms.models import model_to_dict
 from .models import (Report, )
 from conduit.apps.units.models import (Unit,)
 from .serializers import (ReportSerializer,)
 from .renderers import (ReportJSONRenderer,)
 from conduit.apps.webservices.oss import upload_to_oss
+from conduit.apps.webservices.sms import unitGetWeather,sms_send_iot
+from conduit.apps.units.views import sendLatestConfig
+from conduit.apps.units.serializers import UnitSerializer
 
 import os,uuid
 from datetime import datetime, timedelta
@@ -23,7 +26,7 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     permission_classes = (AllowAny,)
     serializer_class = ReportSerializer
-
+    unit_serializer_class = UnitSerializer
     renderer_classes = (ReportJSONRenderer, )
 
     def create(self, request):
@@ -38,6 +41,13 @@ class ReportViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        unit = Unit.objects.filter(id = serializer.data['unitId']).first()
+        if (serializer_data['isAlert'] == 1):
+            weather = unitGetWeather(unit=model_to_dict(unit))
+            if ('雨' in weather):
+                print ('weather is raining while receiving alert, trigger unit to disable alarm temporarily')
+                sendLatestConfig(model_to_dict(unit), True)
+
         return Response({"reports": serializer.data}, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):

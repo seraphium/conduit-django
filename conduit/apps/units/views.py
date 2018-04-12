@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from conduit.apps.core.utils import calcChecksum
-from conduit.apps.webservices.sms import sms_send_iot
+from conduit.apps.webservices.sms import sms_send_iot, unitGetWeather
 from .models import Unit
 from .renderers import UnitJSONRenderer, UnitAlarmSettingsJSONRenderer, UnitNetworkSettingsJSONRenderer, \
     UnitCameraSettingsJSONRenderer
@@ -16,7 +16,7 @@ from .serializers import UnitSerializer
 
 
 # send basic config sms ##HS to sphere while creating or updating unit
-def sendLatestConfig(unit):
+def sendLatestConfig(unit,weatherMask = False):
     contentString = "##HS#LA{0}B{1}C{2}#M{3}#I{4}#P{5}"
     distanceA= str(unit['alarmSettings']['almDistSet1']).zfill(4)
     distanceB= str(unit['alarmSettings']['almDistSet2']).zfill(4)
@@ -28,7 +28,7 @@ def sendLatestConfig(unit):
         cameraMode = cameraMode | 4
     if unit['alarmSettings']['beepEnable'] == 1:
         cameraMode = cameraMode | 2
-    if unit['alarmSettings']['weatherMask'] == 1:
+    if unit['alarmSettings']['weatherMask'] == 1 or weatherMask is True:
         cameraMode = cameraMode | 1
     cameraMode = str(cameraMode).zfill(3)
 
@@ -130,7 +130,6 @@ class UnitsViewSet(mixins.CreateModelMixin,
 
         serializer = self.serializer_class(serializer_instance,
                                            context=serializer_context)
-
         return Response(serializer.data, status = status.HTTP_200_OK)
 
 
@@ -159,7 +158,10 @@ class UnitUpdateAPIView(generics.UpdateAPIView):
                                             context=serializer_context,
                                             data=serializer_data,
                                             partial=True)
+
+
         serializer.is_valid(raise_exception=True)
+
         serializer.save()
         if serializer_data.get('type', None) == 2:
             sendLatestConfig(unit=serializer.validated_data)
